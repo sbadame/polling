@@ -1,0 +1,7 @@
+This app requires some templates to come with it.
+
+TODO
+* Figure out how to better sync the template with this project.
+* Include navigation between pages
+* Combine the poll/<id> and poll/<id>/results pages into a single page.
+* Allow for multiple poll results to be combined
