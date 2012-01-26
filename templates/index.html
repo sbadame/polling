@@ -1,0 +1,53 @@
+
+<script type="text/javascript">
+    optionCount = 2;
+    function addPollOption() {
+        options = document.getElementById("options");
+        console.log(options);
+
+        // Input
+        input = document.createElement("input");
+        input.type = "text";
+        input.name = "choice" + optionCount;
+        input.id = "choice" + optionCount + "input";
+        input.value = "Choice " + optionCount;
+
+        // Label
+        label = document.createElement("label");
+        label.htmlFor = input.id;
+        label.innerHTML = "Choice " + optionCount + " :";
+
+        //Add the nodes
+        options.appendChild(label);
+        options.appendChild(input);
+        options.appendChild(document.createElement("br"));
+        optionCount++;
+    }
+</script>
+<h2> Create a Poll! </h2>
+{% if error_message %}
+    <h3> {{ error_message }} </h3>
+{% endif %}
+<form action="/create" id="pollForm" method="post">
+    {% csrf_token %}
+    <label for="questioninput"> Question: </label>
+    <input type="text" name="question" id="questioninput" value="Enter your question here" />
+    <br />
+    <div id="options">
+        <label for="choice1input"> Choice 1 : </label>
+        <input type="text" name="choice1" id="choice1input" value="Choice 1" />
+        <br />
+    </div>
+    <button type="button" onclick="addPollOption();"> Add Another Choice </button>
+    <br />
+    <input type="submit" value="Create Poll!" />
+</form>
+
+{% if latest_poll_list %}
+    <h2>Polls</h2>
+    <ul>
+        {% for poll in latest_poll_list %}
+            <li><a href="/{{ poll.id }}/">{{ poll.question }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}

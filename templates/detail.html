@@ -1,0 +1,41 @@
+<h1>{{ poll.question }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }} </strong></p>{% endif %}
+
+<script type="text/javascript">
+    function storeVote() {
+        var daysToExpire = 7;
+        var expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + daysToExpire);
+        var cookieValue = "poll{{ poll.id }}=voted; expires=" + expirationDate.toGMTString() + "; path=/";
+        document.cookie = cookieValue;
+    }
+
+    function alreadyVoted() {
+        cookies = document.cookie.split(";");
+        for(i = 0; i < cookies.length; i++) {
+            name = cookies[i].substr(0,cookies[i].indexOf("="));
+            value = cookies[i].substr(cookies[i].indexOf("=") + 1);
+            name = name.replace(/^\s+|\s+$/g,"");
+            value = value.replace(/^\s+|\s+$/g,"");
+            if (name == "poll{{ poll.id }}" && value == "voted") {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (alreadyVoted()) {
+        window.location = "/{{ poll.id}}/results/";
+    }
+
+</script>
+<form action="/{{ poll.id }}/vote/" method="post">
+{% csrf_token %}
+
+{% for choice in poll.choice_set.all %}
+    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    <label for="choice{{ forloop.counter }}">{{ choice.choice }}</label><br />
+{% endfor %}
+<input type="submit" value="Vote" onclick="storeVote();" />
+</form>

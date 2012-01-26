@@ -27,7 +27,7 @@ def create(request):
             raise KeyError("No question supplied")
     except KeyError:
         return render_to_response(\
-            'pollstemplate/index.html',\
+            'index.html',\
             {'error_message':"You did not supply a question"},\
             context_instance = RequestContext(request))
 
@@ -44,7 +44,7 @@ def create(request):
 
     if not choices or len(choices) < 2:
         return render_to_response(\
-            'pollstemplate/index.html',\
+            'index.html',\
             {'error_message':"You did not supply enough choices"},\
             context_instance = RequestContext(request))
     else:
@@ -60,7 +60,7 @@ def vote(request, poll_id):
     try:
         selected_choice = p.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
-        return render_to_response('pollstemplate/detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
+        return render_to_response('detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
     hasher = hashlib.md5()
