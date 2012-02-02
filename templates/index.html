@@ -48,7 +48,7 @@
     <h2>Polls</h2>
     <ul>
         {% for poll in latest_poll_list %}
-            <li><a href="/{{ poll.id }}/">{{ poll.question }}</a></li>
+        <li><a href="{% url polls.urls.poll_view_function poll.id %}">{{ poll.question }}</a></li>
         {% endfor %}
     </ul>
 {% endif %}
