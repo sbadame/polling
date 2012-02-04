@@ -16,7 +16,7 @@ class PollAdmin(admin.ModelAdmin):
         ('Date Expire Info', {'fields': ['date_expire']}),
     ]
     inlines = [ChoiceInline,VoteInline]
-    list_display = ('question', 'date_created', date_expire)
+    list_display = ('question', 'date_created', 'date_expire')
     list_filter = ['date_created']
     search_fields = ['question']
 
