@@ -1,3 +1,6 @@
+{% if poll.has_expired %}
+    <h1> Poll has expired. </h1>
+{% endif %}
 <h1>{{ poll.question }}</h1>
 
 <ul>

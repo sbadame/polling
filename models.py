@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 
 # The rundown on how to to deal with models
@@ -21,7 +22,10 @@ from django.db import models
 class Poll(models.Model):
     question = models.CharField(max_length=20)
     date_created = models.DateTimeField('date_created')
-    date_expire = models.DateTimeField('date_expire', null=True)
+    date_expire = models.DateTimeField('date_expire', default=datetime.datetime.now() + datetime.timedelta(weeks=1))
+
+    def has_expired(self):
+        return self.date_expire < datetime.datetime.now()
 
     def __unicode__(self):
         return self.question

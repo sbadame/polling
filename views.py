@@ -7,19 +7,6 @@ from polls.models import Poll,Choice,Vote
 
 import hashlib
 
-# def index(request):
-#     latest_poll_list = Poll.objects.all().order_by('-date_created')[:5]
-#     return render_to_response("polls/index.html", {'latest_poll_list': latest_poll_list})
-# 
-# def detail(request, poll_id):
-#     p = get_object_or_404(Poll, pk=poll_id)
-#     return render_to_response("polls/detail.html", {'poll': p}, context_instance=RequestContext(request))
-# 
-# def results(request, poll_id):
-#     p = get_object_or_404(Poll, pk=poll_id)
-#     return render_to_response("polls/results.html", {'poll': p})
-# 
-
 def create(request):
     try:
         question = request.POST['question'].strip()
@@ -54,6 +41,14 @@ def create(request):
             p.choice_set.create(choice=choice, votes=0)
         return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
+def view(request, poll_id):
+    poll = get_object_or_404(Poll, pk=poll_id)
+    if poll.has_expired():
+        return HttpResponseRedirect(reverse('poll_results',args=(poll_id,)))
+    else:
+        return render_to_response("detail.html", {'poll' : poll}, context_instance=RequestContext(request))
+
+
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)
@@ -63,15 +58,16 @@ def vote(request, poll_id):
         return render_to_response('detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
-    hasher = hashlib.md5()
-    hasher.update(request.META['REMOTE_ADDR'])
-    hasher.update(request.META['HTTP_USER_AGENT'])
-    hash = hasher.hexdigest()
-    try:
-        vote = p.vote_set.get(hash=hash)
-    except Vote.DoesNotExist:
-        selected_choice.votes += 1
-        selected_choice.save()
-        p.vote_set.create(hash=hash)
+    if not p.has_expired():
+        hasher = hashlib.md5()
+        hasher.update(request.META['REMOTE_ADDR'])
+        hasher.update(request.META['HTTP_USER_AGENT'])
+        hash = hasher.hexdigest()
+        try:
+            vote = p.vote_set.get(hash=hash)
+        except Vote.DoesNotExist:
+            selected_choice.votes += 1
+            selected_choice.save()
+            p.vote_set.create(hash=hash)
 
     return HttpResponseRedirect(reverse('poll_results',args=(p.id,)))
