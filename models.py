@@ -5,6 +5,7 @@ from django.db import models
 class Poll(models.Model):
     question = models.CharField(max_length=20)
     date_created = models.DateTimeField('date_created')
+    date_expire = models.DateTimeField('date_expire', null=True)
 
     def __unicode__(self):
         return self.question
