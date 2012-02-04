@@ -1,6 +1,22 @@
 from django.db import models
 
-# Create your models here.
+# The rundown on how to to deal with models
+# =========================================
+#   Help my database is out dated!!
+#       1.) Go up one directory and run: "./manage.py migrate polls"
+#
+#   I wanna add/change/remove a field!
+#       1.) Make your changes here
+#       2.) Go up 1 directory and run: "./manage.py schemamigration polls --auto"
+#       3.) You'll have a new file in polls/migration. Commit those to git.
+#       4.) If you don't want to modify any data then just run: "./manage.py migrate polls"
+#
+#   But I need to change the value of some fields!
+#       2.) Run "./manage.py datamigration polls <enter a super cool name here>"
+#       3.) Edit the forwards() and backwards() functions in
+#             polls/migration/<enter a super cool name here>.py to do what you want with the models.
+#       4.) Commit polls/migration/<enter a super cool name here>.py to git
+#       5.) Run "./manage.py migrate polls"
 
 class Poll(models.Model):
     question = models.CharField(max_length=20)
