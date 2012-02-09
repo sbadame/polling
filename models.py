@@ -20,7 +20,7 @@ from django.db import models
 #       5.) Run "./manage.py migrate polls"
 
 class Poll(models.Model):
-    question = models.CharField(max_length=20)
+    question = models.CharField(max_length=200)
     date_created = models.DateTimeField('date_created')
     date_expire = models.DateTimeField('date_expire', default=datetime.datetime.now() + datetime.timedelta(weeks=1))
 
