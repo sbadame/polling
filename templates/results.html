@@ -1,8 +1,6 @@
-{% if poll.has_expired %}
-    <h1> Poll has expired. </h1>
-{% endif %}
+{% extends "base.html" %}
+{% block content %}
 <h1>{{ poll.question }}</h1>
-
 <ul>
 {% for choice in poll.choice_set.all %}
     <li>{{ choice.choice }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
@@ -10,3 +8,4 @@
 </ul>
 
 <a href="/{{ poll.id }}/"/>Vote Again?</a>
+{% endblock %}
