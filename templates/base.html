@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
     <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
     <title>{% block title %}gimme a poll{% endblock %}</title>
 </head>
@@ -43,4 +43,10 @@
       {% block content %}{% endblock %}
   </div>
 </body>
+    <script type="text/javascript" src="{{STATIC_URL}}bootstrap/js/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="{{STATIC_URL}}bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="{{STATIC_URL}}bootstrap/js/bootstrap-dropdown.js"></script>
+        <script type="text/javascript"> $(document).ready(function(){
+          $('.dropdown-toggle').dropdown()
+          }); </script>
 </html>
