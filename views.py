@@ -7,6 +7,20 @@ from polls.models import Poll,Choice,Vote
 
 import hashlib
 
+def request_hash(request):
+    hasher = hashlib.md5()
+    hasher.update(request.META['REMOTE_ADDR'])
+    hasher.update(request.META['HTTP_USER_AGENT'])
+    return hasher.hexdigest()
+
+def already_voted(request, poll):
+    hash = request_hash(request)
+    try:
+        poll.vote_set.get(hash__exact=hash)
+    except Vote.DoesNotExist:
+        return False
+    return True
+
 def create(request):
     try:
         question = request.POST['question'].strip()
@@ -43,12 +57,11 @@ def create(request):
 
 def view(request, poll_id):
     poll = get_object_or_404(Poll, pk=poll_id)
-    if poll.has_expired():
-        return HttpResponseRedirect(reverse('poll_results',args=(poll_id,)))
+    if poll.has_expired() or already_voted(request, poll):
+        template = "results.html"
     else:
-        return render_to_response("detail.html", {'poll' : poll}, context_instance=RequestContext(request))
-
-
+        template = "detail.html"
+    return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)
@@ -59,10 +72,7 @@ def vote(request, poll_id):
                 context_instance= RequestContext(request))
 
     if not p.has_expired():
-        hasher = hashlib.md5()
-        hasher.update(request.META['REMOTE_ADDR'])
-        hasher.update(request.META['HTTP_USER_AGENT'])
-        hash = hasher.hexdigest()
+        hash = request_hash(request)
         try:
             vote = p.vote_set.get(hash=hash)
         except Vote.DoesNotExist:
@@ -70,4 +80,4 @@ def vote(request, poll_id):
             selected_choice.save()
             p.vote_set.create(hash=hash)
 
-    return HttpResponseRedirect(reverse('poll_results',args=(p.id,)))
+    return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
