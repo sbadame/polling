@@ -6,11 +6,28 @@
     </div>
 {% endif %}
 <h1>{{ poll.question }}</h1>
-<ul>
-{% for choice in poll.choice_set.all %}
-    <li>{{ choice.choice }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-{% endfor %}
-</ul>
+
+<div id="graph"></div>
 
 <a href="/{{ poll.id }}/"/>Vote Again?</a>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{{STATIC_URL}}graphing/jqBarGraph.1.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            arrayOfData = new Array({% spaceless %}
+                {% for choice, votes in poll.results %}
+                    [{{votes}}, '{{choice}}']
+                    {% if not forloop.last %},{% endif %}
+                {% endfor %});
+            {% endspaceless %}
+            $('#graph').jqBarGraph({
+                data: arrayOfData,
+                width:200,
+                height:200,
+                colors: ['#122A47',
+                '#1B3E69'] });
+        });
+    </script>
 {% endblock %}

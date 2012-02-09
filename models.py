@@ -24,6 +24,9 @@ class Poll(models.Model):
     date_created = models.DateTimeField('date_created')
     date_expire = models.DateTimeField('date_expire', default=datetime.datetime.now() + datetime.timedelta(weeks=1))
 
+    def results(self):
+        return [ (c.choice, c.votes) for c in self.choice_set.all()]
+
     def has_expired(self):
         return self.date_expire < datetime.datetime.now()
 
