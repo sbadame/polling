@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
+{% if poll.has_expired %}
+    <div class="alert alert-error">
+        Poll has expired!
+    </div>
+{% endif %}
 <h1>{{ poll.question }}</h1>
 <ul>
 {% for choice in poll.choice_set.all %}
