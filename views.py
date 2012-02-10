@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
+from django.http import HttpResponseRedirect, HttpResponse
+from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
 from polls.models import Poll,Choice,Vote
 
@@ -62,6 +62,12 @@ def view(request, poll_id):
     else:
         template = "detail.html"
     return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
+
+def index(request):
+    latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
+    popular_poll_list = Poll.objects.all().order_by('-vote')[:10]
+    template = "index.html"
+    return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list}, context_instance=RequestContext(request))
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)

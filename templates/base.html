@@ -15,11 +15,11 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </a>
-        <a class="brand" href="#">gimme a poll</a>
+        <a class="brand" href="{% url index_view %}">gimme a poll</a>
         <div class="nav-collapse">
           <ul class="nav pull-right">
-              <li class="active"><a href="{% url polls.urls.index_view_function %}">Home</a></li>
-            <li><a href="#">About</a></li>
+              <li class="active"><a href="{% url index_view %}">Home</a></li>
+              <li><a href="{% url polls.urls.about_view %}">About</a></li>
 
             <li><a href="#">Contact</a></li>
             <li class="dropdown">
