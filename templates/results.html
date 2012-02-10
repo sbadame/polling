@@ -41,7 +41,7 @@
             var barAttr = {stroke: "#333"};
 
             var paper = new Raphael($('#canvas_container').get(0), width, height);
-            var barWidth = (width - barPadding*(data.length - 1)) / data.length;
+            var barWidth = Math.min(65, (width - barPadding*(data.length - 1)) / data.length);
             var barHeightMax = height - 2*(fontSizePx + labelPadding);
             var largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
             var tickSize = barHeightMax/largestValue;
