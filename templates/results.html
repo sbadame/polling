@@ -8,25 +8,68 @@
 <h1>{{ poll.question }}</h1>
 
 <div id="graph"></div>
+<div id="canvas_container"></div>
 
 {% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript" src="{{STATIC_URL}}graphing/jqBarGraph.1.1.min.js"></script>
+    <style type="text/css">
+        #canvas_container {
+            width: 300px;
+            height: 200px;
+        }
+    </style>
+    <script type="text/javascript" src="{{STATIC_URL}}graphing/raphael-min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            arrayOfData = new Array({% spaceless %}
-                {% for choice, votes in poll.results %}
-                    [{{votes}}, '{{choice}}']
-                    {% if not forloop.last %},{% endif %}
-                {% endfor %});
-            {% endspaceless %}
-            $('#graph').jqBarGraph({
-                data: arrayOfData,
-                width:200,
-                height:200,
-                colors: ['#122A47',
-                '#1B3E69'] });
+
+            var width = 300;
+            var height = 200;
+            var barPadding = 7;
+            var labelPadding = 3;
+
+            //Font Settings
+            var fontSizePx = 13;
+            var fontName = "Helvetica";
+            var fontAttr = {font: fontSizePx + "px " + fontName, fill:"#333"};
+
+            //Bar attributes
+            var barAttr = {stroke: "#333"};
+
+            var data = new Array(["Choice #1", 3], ["Choice #2", 1], ["Choice #3", 5]);
+            var paper = new Raphael($('#canvas_container').get(0), width, height);
+            var barWidth = (width - barPadding*(data.length - 1)) / data.length;
+            var barHeightMax = height - 2*(fontSizePx + labelPadding);
+            var largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
+            var tickSize = barHeightMax/largestValue;
+            var colors = new Array("#043095", "#B30065", "#8BD000", "#DF9400");
+            var colors2 = new Array("#011A54", "#650039", "#4E7500", "#7D5400");
+
+            var x = 0;
+            for (index in data) {
+                var choiceLabel = data[index][0];
+                var choiceValue = data[index][1];
+                var barHeight = choiceValue*tickSize;
+                var barY = barHeightMax-barHeight+labelPadding+fontSizePx;
+                var animationTime = 1500+(200*(Math.random()-0.5));
+
+                //Lets make bar!
+                var bar = paper.rect(x, height-labelPadding-fontSizePx, barWidth, 0);
+                bar.attr(barAttr).attr({gradient: "270-"+colors[index]+"-"+colors2[index]});
+                bar.animate({y: barY, height: barHeight}, animationTime, '<>');
+
+                //Choice name label
+                paper.text(x + barWidth/2, height - fontSizePx/2, choiceLabel).attr(fontAttr);
+
+                //Bar value
+                var text = paper.text(x + barWidth/2, height-(2*labelPadding)-fontSizePx, choiceValue).attr(fontAttr);
+                text.animate({y: barY- (fontSizePx/2) - labelPadding}, animationTime, '<>');
+
+
+                //Move x along
+                x += barWidth + barPadding;
+            }
+
         });
     </script>
 {% endblock %}
