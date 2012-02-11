@@ -16,6 +16,9 @@
             <label for="choice1input"> Choice 1 : </label>
             <input type="text" name="choice1" id="choice1input" value="Choice 1" />
             <br />
+            <label for="choice2input"> Choice 2 : </label>
+            <input type="text" name="choice2" id="choice2input" value="Choice 2" />
+            <br />
         </div>
         <button type="button" class="btn-small btn" onclick="addPollOption();"> Add Another Choice </button>
         <br /> <br /> <br />
@@ -27,24 +30,31 @@
     <div class="span4">
         {% if latest_poll_list %}
             <h2>Newest Polls</h2>
-            <ul>
+            <ol>
                 {% for poll in latest_poll_list %}
                 <li><a href="{% url poll_view poll.id %}">{{ poll.question }}</a></li>
                 {% endfor %}
-            </ul>
+            </ol>
         {% endif %}
     </div>
     <div class="span4">
         <h2>Most Popular Polls</h2>
+        <ul>
+            {% for poll in popular_poll_list %}
+            <li><a href="{% url poll_view poll.id %}">{{ poll.question }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
     <div class="span4">
         <h2>Search Polls</h2>
+        <p>This area is currently under construction. Apparently it's really hard to make it so that it doesn't suck
+        hard</p>
     </div>
 </div>
 
 
 <script type="text/javascript">
-    optionCount = 2;
+    optionCount = 3;
     function addPollOption() {
         options = document.getElementById("options");
 
