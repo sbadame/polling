@@ -20,7 +20,7 @@ function graph(element, data, overrides) {
         fontName: "Helvetica", //the font name used
         colors: ["#043095", "#B30065", "#8BD000", "#DF9400"], //First color of gradient for each bar passed in data
         colors2: ["#011A54", "#650039", "#4E7500", "#7D5400"], //Second color of gradient
-        barAttr: {stroke: "#333"}, //Raphael attribute for the bars drawn.
+        barAttr: {stroke: "#333"} //Raphael attribute for the bars drawn.
     };
 
     //Combines defaults with overrides and stores the result in defaults
