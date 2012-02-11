@@ -1,14 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-{% if poll.has_expired %}
-    <div class="alert alert-error">
-        Poll has expired!
-    </div>
-{% endif %}
-<h1>{{ poll.question }}</h1>
 
-<div id="graph"></div>
-<div id="canvas_container"></div>
+<div class="container">
+    <div class="row">
+        <div class="span8">
+
+            {% if poll.has_expired %}
+                <div class="alert alert-error">
+                    Poll has expired!
+                </div>
+            {% endif %}
+
+            <h1>{{ poll.question }}</h1>
+
+            <div id="graph"></div>
+            <div id="canvas_container"></div>
+        </div>
+        <div class="span4">
+            <h2>Poll Info Here</h2>
+            <ul>
+                <li>Date Created</li>
+                <li>Date to Expire</li>
+                <li>Total Votes</li>
+                <li>Total Views</li>
+                <li>Idk</li>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 
