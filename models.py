@@ -30,6 +30,10 @@ class Poll(models.Model):
     def has_expired(self):
         return self.date_expire < datetime.datetime.now()
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('polls.views.view', (), {'poll_id':self.id})
+
     def __unicode__(self):
         return self.question
 

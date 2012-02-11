@@ -1,0 +1,2 @@
+{{ object.question }}
+{{ object.date_created }}
