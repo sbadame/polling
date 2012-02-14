@@ -5,8 +5,6 @@ from polls.models import Poll
 class PollIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(model_attr='question', document=True, use_template=True)
     date_created = indexes.DateTimeField(model_attr='date_created')
-
-    text = indexes.CharField(model_attr='question', document=True, use_template=True)
     suggestions = indexes.FacetCharField()
 
     def get_model(self):
