@@ -1,4 +1,8 @@
 
+/**
+ * Wraps returns the same text box as the one passed in but with wrapped
+ * text.
+ */
 function wrap(text, content, maxWidth) {
     var words = content.split(" ");
 
@@ -50,31 +54,38 @@ function graph(element, data, overrides) {
 
     var paper = new Raphael(element, s.width, s.height);
     var barWidth = Math.min(65, (s.width - s.barPadding*(data.length - 1)) / data.length);
-    var barHeightMax = s.height - 2*(s.fontSizePx + s.labelPadding);
     var largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
-    var tickSize = barHeightMax/largestValue;
     var colors = new Array("#043095", "#B30065", "#8BD000", "#DF9400");
     var colors2 = new Array("#011A54", "#650039", "#4E7500", "#7D5400");
 
-    var x = 0;
-    for (index in data) {
+    var tallestLabel = -1;
+    var barLabels = new Array();
+    for (var i = 0; i < data.length; i++) {
+         //Choice name label
+         barLabels[i] = paper.text();
+         wrap(barLabels[i], data[i][0], barWidth);
+         tallestLabel = Math.max(tallestLabel, barLabels[i].getBBox().height);
+    }
+    var barHeightMax = s.height - 2*(tallestLabel + s.labelPadding);
+    var tickSize = barHeightMax/largestValue;
+
+    var x = 0; //Keep track of our x position as we loop through the data
+    for (var index = 0; index < data.length; index++) {
         var choiceLabel = data[index][0];
         var choiceValue = data[index][1];
         var barHeight = choiceValue*tickSize;
-        var barY = barHeightMax-barHeight+s.labelPadding+s.fontSizePx;
+        var barY = barHeightMax-barHeight+s.labelPadding+tallestLabel;
         var animationTime = 1500+(200*(Math.random()-0.5));
 
         //Lets make bar!
-        var bar = paper.rect(x, s.height-s.labelPadding-s.fontSizePx, barWidth, 0);
+        var bar = paper.rect(x, s.height-s.labelPadding-tallestLabel, barWidth, 0);
         bar.attr(s.barAttr).attr({gradient: "270-"+s.colors[index]+"-"+s.colors2[index]});
         bar.animate({y: barY, height: barHeight}, animationTime, '<>');
 
-        //Choice name label
-        var label = paper.text(x + barWidth/2, s.height - s.fontSizePx/2).attr(s.fontAttr);
-        label = wrap(label, choiceLabel, barWidth*1.5);
+        barLabels[index].attr({x: x + barWidth/2, y: s.height - s.labelPadding - tallestLabel/2}).attr(s.fontAttr);
 
         //Bar value
-        var text = paper.text(x + barWidth/2, barY - (s.fontSizePx/2) - s.labelPadding, choiceValue);
+        var text = paper.text(x + barWidth/2, barY - (tallestLabel/2) - s.labelPadding, choiceValue);
         text.attr({opacity: 0.0}).attr(s.fontAttr);
         var fadeIn = Raphael.animation({opacity:1.0}, animationTime*0.5);
         text.animate(fadeIn.delay(animationTime));
