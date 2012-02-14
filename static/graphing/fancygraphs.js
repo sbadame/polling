@@ -1,4 +1,20 @@
 
+function wrap(text, content, maxWidth) {
+    var words = content.split(" ");
+
+    var temp = "";
+    for (var i=0; i < words.length; i++) {
+        text.attr("text", temp + " " + words[i]);
+        if (text.getBBox().width > maxWidth) {
+            temp += "\n" + words[i];
+        } else {
+            temp += " " + words[i];
+        }
+    }
+    text.attr("text", temp.substring(1));
+}
+
+
 /**
  * Given an element and some data this function will make a bar char for you!
  * element: The HTML dom element to put the svg data in
@@ -6,7 +22,6 @@
  *      ex) an example value could be: [['Sandro', 100], ['Chris', 200]]
  * overrides: A list of settings that you can override
  */
-
 function graph(element, data, overrides) {
     if (overrides == undefined) {
         overrides = [];
@@ -14,7 +29,7 @@ function graph(element, data, overrides) {
     s = {
         width: 300, //width of the graph
         height: 200, //height of the graph
-        barPadding: 7, //space in between the bars
+        barPadding: 40, //space in between the bars
         labelPadding: 3,//The amount of space between a label and the bar
         fontSizePx: 13, //The font size used in pixels
         fontName: "Helvetica", //the font name used
@@ -55,10 +70,12 @@ function graph(element, data, overrides) {
         bar.animate({y: barY, height: barHeight}, animationTime, '<>');
 
         //Choice name label
-        paper.text(x + barWidth/2, s.height - s.fontSizePx/2, choiceLabel).attr(s.fontAttr);
+        var label = paper.text(x + barWidth/2, s.height - s.fontSizePx/2).attr(s.fontAttr);
+        label = wrap(label, choiceLabel, barWidth*1.5);
 
         //Bar value
-        var text = paper.text(x + barWidth/2, barY - (s.fontSizePx/2) - s.labelPadding, choiceValue).attr({opacity: 0.0}).attr(s.fontAttr);
+        var text = paper.text(x + barWidth/2, barY - (s.fontSizePx/2) - s.labelPadding, choiceValue);
+        text.attr({opacity: 0.0}).attr(s.fontAttr);
         var fadeIn = Raphael.animation({opacity:1.0}, animationTime*0.5);
         text.animate(fadeIn.delay(animationTime));
 
