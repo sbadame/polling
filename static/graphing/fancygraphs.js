@@ -21,7 +21,6 @@ function wrap(text, content, maxWidth) {
         }
     }
 
-    console.log("H: " + text.getBBox().height);
     text.attr("text", temp.substring(1));
 }
 
@@ -32,12 +31,11 @@ function wrap(text, content, maxWidth) {
  * It also makes creating paths in raphael infinitly easier...
  */
 String.prototype.format = function() {
-  var args = arguments;
+    var args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) {
-            return typeof args[number] != 'undefined' ? args[number] : match;
-      });
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
 };
-
 
 /**
  * Given an element and some data this function will make a bar char for you!
@@ -60,7 +58,11 @@ function graph(element, data, overrides) {
         colors: ["#043095", "#B30065", "#8BD000", "#DF9400"], //First color of gradient for each bar passed in data
         colors2: ["#011A54", "#650039", "#4E7500", "#7D5400"], //Second color of gradient
         barAttr: {stroke: "#333"}, //Raphael attribute for the bars drawn.
-        maxBarWidth: 80
+        maxBarWidth: 80,
+        yAxis: [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150, 200, 300, 400, 500],
+        ticksAt: [100, 50, 25, 10, 5, 1],
+        tickCount: 4,
+        tickWidth: 20
     };
 
     //Combines defaults with overrides and stores the result in defaults
@@ -75,14 +77,27 @@ function graph(element, data, overrides) {
     var paper = new Raphael(element, s.width, s.height);
     var barWidth = Math.min(s.maxBarWidth, (s.width - s.barPadding*(data.length - 1)) / data.length);
     var largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
-    var colors = new Array("#043095", "#B30065", "#8BD000", "#DF9400");
-    var colors2 = new Array("#011A54", "#650039", "#4E7500", "#7D5400");
+
+    //Get the yaxis that fits our graph best
+    var maxY = s.yAxis[0];
+    var i = 0;
+    while (i < s.yAxis.length && largestValue > s.yAxis[i]) {
+        i++;
+    }
+    largestValue = s.yAxis[i];
+    var tickIndex = 0;
+    while (tickIndex < (s.ticksAt.length - s.tickCount) && s.ticksAt[tickIndex] > largestValue) {
+        tickIndex++;
+    }
 
     //Create a label for each bar along the bottom
+    //We can't set the y values for the bar yet because we don't know how tall the tallest one is.
+    //Once we've gone through them all we can pick out the tallest one and then apply the y position
+    //to all of these labels
     var tallestLabel = -1;
-    var x = 0;
+    var x = s.tickWidth;
     var barLabels = new Array();
-    for (var i = 0; i < data.length; i++) {
+    for (i = 0; i < data.length; i++) {
          //Choice name label
          barLabel = paper.text();
          wrap(barLabel, data[i][0], barWidth - 5);
@@ -91,31 +106,52 @@ function graph(element, data, overrides) {
          x += barWidth + s.barPadding;
          barLabels[i] = barLabel;
     }
+
     //Raphael seems to be giving a height for the text that is slightly shorter than the actual height. This causes
     //things like y's and g's to get cut off. My solution? Add a magical '4'. Why 4? Trial and error says that it works.
     var labelYPos = s.height - (4+(tallestLabel/2));
     barLabels.map(function(barLabel){barLabel.attr({y: labelYPos});});
-
-    var barHeightMax = s.height - 2*(tallestLabel + s.labelPadding);
-    var tickSize = barHeightMax/largestValue;
 
     //Start the bars at the position of the text labels and the move up by the amount of label padding
     //Since the labelYPos has Y in the middle of the text object (Raphael doesn't support setting vertical alignment
     //yet) we need to move up (subtract) one half of the height of tallest label to get where we need.
     //Also the magic constant of 4 needs to make a reappearence.
     var startBarHeight = labelYPos - (4+tallestLabel/2) - s.labelPadding;
+    var endBarHeight = s.height - (startBarHeight + s.labelPadding + s.fontSizePx/2);
+    var tickSize = (startBarHeight - endBarHeight)/largestValue;
 
     //Draw a line across the bottom starting from x=0 to x=s.width at the bar's bottom
-    var pathText = "M 0 {0} l {1} 0".format(startBarHeight, s.width);
-    paper.path(pathText);
+    var bottomLine = "M {0} {1} l {2} 0".format(s.tickWidth, startBarHeight, s.width);
+    paper.path(bottomLine);
 
-    x = 0; //Keep track of our x position as we loop through the data
+    var maxTick = -1;
+    for(tick = 0; tick <= largestValue; tick++) {
+        for(tickLevel = 0; tickLevel < s.tickCount; tickLevel++) {
+            if ( (tick % s.ticksAt[tickLevel+tickIndex]) === 0) {//Yes this is correct THREE equals signs. Javascript, wtf are you??
+                //Draw a line up to the top from the barchat bottomline
+                var height = startBarHeight-(tick*tickSize);
+                var label = paper.text(0, height, tick).attr("text-anchor","start");
+                //This should turn into something configurable
+                if (tickLevel === 0 || tick == largestValue) {
+                    label.attr("font-weight", "bold").attr("font-size",14);
+                } else if (tickLevel === 1) {
+                    label.attr("font-weight", "bold");
+                }
+                var tickWidth = label.getBBox().width;
+                maxTick = Math.max(maxTick, tickWidth);
+                var axisLine = "M {0} {1} l {2} 0".format(tickWidth, height, s.tickWidth-tickWidth);
+                paper.path(axisLine);
+                break;
+            }
+        }
+    }
+
+    x = s.tickWidth; //Keep track of our x position as we loop through the data
     for (var index = 0; index < data.length; index++) {
         var choiceLabel = data[index][0];
         var choiceValue = data[index][1];
         var barHeight = choiceValue*tickSize;
         var barTop = startBarHeight - barHeight;
-        var barY = barHeightMax-barHeight+tallestLabel;
         var animationTime = 1500+(200*(Math.random()-0.5));
 
         //Lets make bar!
@@ -132,7 +168,7 @@ function graph(element, data, overrides) {
         var fadeIn = Raphael.animation({opacity:1.0}, animationTime*0.5);
         text.animate(fadeIn.delay(animationTime));
 
-        //Move x along
+        //Keep moving x along to the next bar
         x += barWidth + s.barPadding;
     }
     //Moments like this I just love jquery... get all of the hyperlinks (generated because by the title elements in
