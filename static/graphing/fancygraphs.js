@@ -21,8 +21,22 @@ function wrap(text, content, maxWidth) {
         }
     }
 
+    console.log("H: " + text.getBBox().height);
     text.attr("text", temp.substring(1));
 }
+
+/**
+ * Another moment where I am not sure if I love or hate this language.
+ * Here, I'm just going to add a function to the string class. Why?
+ * Because I can.
+ * It also makes creating paths in raphael infinitly easier...
+ */
+String.prototype.format = function() {
+  var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined' ? args[number] : match;
+      });
+};
 
 
 /**
@@ -37,8 +51,8 @@ function graph(element, data, overrides) {
         overrides = [];
     }
     s = {
-        width: 300, //width of the graph
-        height: 200, //height of the graph
+        width: 500, //width of the graph
+        height: 300, //height of the graph
         barPadding: 40, //space in between the bars
         labelPadding: 3,//The amount of space between a label and the bar
         fontSizePx: 13, //The font size used in pixels
@@ -64,34 +78,56 @@ function graph(element, data, overrides) {
     var colors = new Array("#043095", "#B30065", "#8BD000", "#DF9400");
     var colors2 = new Array("#011A54", "#650039", "#4E7500", "#7D5400");
 
+    //Create a label for each bar along the bottom
     var tallestLabel = -1;
+    var x = 0;
     var barLabels = new Array();
     for (var i = 0; i < data.length; i++) {
          //Choice name label
-         barLabels[i] = paper.text();
-         wrap(barLabels[i], data[i][0], barWidth - 5);
-         tallestLabel = Math.max(tallestLabel, barLabels[i].getBBox().height);
+         barLabel = paper.text();
+         wrap(barLabel, data[i][0], barWidth - 5);
+         tallestLabel = Math.max(tallestLabel, barLabel.getBBox().height);
+         barLabel.attr({x: x + barWidth/2, title:data[i][0]}).attr(s.fontAttr);
+         x += barWidth + s.barPadding;
+         barLabels[i] = barLabel;
     }
+    //Raphael seems to be giving a height for the text that is slightly shorter than the actual height. This causes
+    //things like y's and g's to get cut off. My solution? Add a magical '4'. Why 4? Trial and error says that it works.
+    var labelYPos = s.height - (4+(tallestLabel/2));
+    barLabels.map(function(barLabel){barLabel.attr({y: labelYPos});});
+
     var barHeightMax = s.height - 2*(tallestLabel + s.labelPadding);
     var tickSize = barHeightMax/largestValue;
 
-    var x = 0; //Keep track of our x position as we loop through the data
+    //Start the bars at the position of the text labels and the move up by the amount of label padding
+    //Since the labelYPos has Y in the middle of the text object (Raphael doesn't support setting vertical alignment
+    //yet) we need to move up (subtract) one half of the height of tallest label to get where we need.
+    //Also the magic constant of 4 needs to make a reappearence.
+    var startBarHeight = labelYPos - (4+tallestLabel/2) - s.labelPadding;
+
+    //Draw a line across the bottom starting from x=0 to x=s.width at the bar's bottom
+    var pathText = "M 0 {0} l {1} 0".format(startBarHeight, s.width);
+    paper.path(pathText);
+
+    x = 0; //Keep track of our x position as we loop through the data
     for (var index = 0; index < data.length; index++) {
         var choiceLabel = data[index][0];
         var choiceValue = data[index][1];
         var barHeight = choiceValue*tickSize;
-        var barY = barHeightMax-barHeight+tallestLabel-s.labelPadding;
+        var barTop = startBarHeight - barHeight;
+        var barY = barHeightMax-barHeight+tallestLabel;
         var animationTime = 1500+(200*(Math.random()-0.5));
 
         //Lets make bar!
-        var bar = paper.rect(x, s.height-s.labelPadding-tallestLabel, barWidth, 0);
+        var bar = paper.rect(x, startBarHeight, barWidth, 0);
         bar.attr(s.barAttr).attr({gradient: "270-"+s.colors[index]+"-"+s.colors2[index]});
-        bar.animate({y: barY, height: barHeight}, animationTime, '<>');
-
-        barLabels[index].attr({x: x + barWidth/2, y: s.height - s.labelPadding - tallestLabel/2, title:choiceLabel}).attr(s.fontAttr);
+        var finalPos = {y: barTop, height: barHeight};
+        bar.animate(finalPos, animationTime, '<>');
 
         //Bar value
-        var text = paper.text(x + barWidth/2, barY - (tallestLabel/2) - s.labelPadding, choiceValue);
+        var text = paper.text(x + barWidth/2, 0, choiceValue); //Don't worry we'll set y soon enough...
+        //Stupid vertical middle centering text... shift up the text by one half it's size again...
+        text.attr({y: barTop - (s.labelPadding + text.getBBox().height/2)});
         text.attr({opacity: 0.0}).attr(s.fontAttr);
         var fadeIn = Raphael.animation({opacity:1.0}, animationTime*0.5);
         text.animate(fadeIn.delay(animationTime));
