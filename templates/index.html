@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="container">
-    <div class="hero-unit">
+    <div class="row">
+    <div class="span6">
         <h2> Create a Poll! </h2>
         {% if error_message %}
             <h3> {{ error_message }} </h3>
@@ -24,7 +25,18 @@
             <br /> <br /> <br />
             <input type="submit" class="btn-large btn-primary" value="Create Poll!" />
         </form>
-    </div><!-- close hero-unit -->
+    </div>
+    <div class="span6">
+        <ul class="thumbnails">
+            <li class="span6">
+            <div class="thumbnail">
+                <img src="http://www.festivusweb.com/images/festivus-pole.jpg" alt="">
+                <p>Yay! Festivus Pole on the Poll Website!</p>
+            </div>
+            </li>
+        </ul>
+    </div>
+    </div>
 
 <div class="row">
     <div class="span4">
