@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
 from polls.models import Poll,Choice,Vote
+import haystack
 
 import hashlib
 

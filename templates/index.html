@@ -59,8 +59,12 @@
     </div>
     <div class="span4">
         <h2>Search Polls</h2>
-        <p>This area is currently under construction. Apparently it's really hard to make it so that it doesn't suck
-        hard</p>
+        <form action="{% url search %}" id="searchForm" method="get">
+            <label for="searchinput"> Search Term: </label>
+            <input type="text" name="q" id="searchinput" value="Enter your search here" />
+            <br />
+            <input type="submit" class="btn btn-primary" value="Search!" />
+        </form>
     </div>
 </div>
 </div><!-- close container -->

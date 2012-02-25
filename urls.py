@@ -7,6 +7,7 @@ import haystack.views
 
 about_view = TemplateView.as_view(template_name='about.html')
 contact_view = TemplateView.as_view(template_name='contact.html')
+#search = TemplateView.as_view(template_name='search.html')
 
 urlpatterns = patterns('',
     url(r'^$','polls.views.index', name = 'index_view'),
@@ -15,7 +16,6 @@ urlpatterns = patterns('',
     url(r'^about$', about_view),
     url(r'^contact$', contact_view),
     url(r'^(?P<poll_id>\d+)/vote/$', 'polls.views.vote'),
-
     # Search page(s)
     url(r'^search/',
         haystack.views.search_view_factory(
