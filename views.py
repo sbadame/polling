@@ -40,6 +40,9 @@ def create(request):
             choice = request.POST['choice'+str(index)].strip()
         except KeyError:
             break
+        if choice[:6] == 'Choice':
+            index += 1
+            continue
         if choice:
             choices.append(choice)
         index += 1
@@ -66,7 +69,7 @@ def view(request, poll_id):
 
 def index(request):
     latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
-    popular_poll_list = Poll.objects.all().order_by('-vote')[:10]
+    popular_poll_list = Poll.objects.order_by('-id').distinct('-id')[:10]
     template = "index.html"
     return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list}, context_instance=RequestContext(request))
 

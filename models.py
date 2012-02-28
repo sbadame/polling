@@ -23,6 +23,7 @@ class Poll(models.Model):
     question = models.CharField(max_length=200)
     date_created = models.DateTimeField('date_created')
     date_expire = models.DateTimeField('date_expire', default=datetime.datetime.now() + datetime.timedelta(weeks=1))
+    total_votes = models.IntegerField(default=0)
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]

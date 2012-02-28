@@ -10,19 +10,22 @@
         {% endif %}
         <form action="/create" id="pollForm" method="post">
             {% csrf_token %}
-            <label for="questioninput"> Question: </label>
-            <input type="text" name="question" id="questioninput" value="Enter your question here" />
+            <!--<label for="questioninput"> Question: </label>-->
+            <input type="text" name="question" id="questioninput" value="Enter Your Question Here" onblur="if
+            (this.value == '') {this.value = 'Enter Your Question Here';}" onfocus="if (this.value == 'Enter Your Question Here') {this.value = '';}" />
             <br />
             <div id="options">
-                <label for="choice1input"> Choice 1 : </label>
-                <input type="text" name="choice1" id="choice1input" value="Choice 1" />
+                <!--<label for="choice1input"> Choice 1 : </label>-->
+                <input type="text" name="choice1" id="choice1input" value="Choice 1" onblur="if(this.value =='')
+                {this.value = 'Choice 1';}" onfocus="if (this.value == 'Choice 1') {this.value = '';}"/>
                 <br />
-                <label for="choice2input"> Choice 2 : </label>
-                <input type="text" name="choice2" id="choice2input" value="Choice 2" />
+                <!--<label for="choice2input"> Choice 2 : </label> -->
+                <input type="text" name="choice2" id="choice2input" value="Choice 2" onblur="if(this.value =='')
+                {this.value = 'Choice 2';}" onfocus="if (this.value == 'Choice 2') {this.value = '';}" />
                 <br />
             </div>
             <button type="button" class="btn-small btn" onclick="addPollOption();"> Add Another Choice </button>
-            <br /> <br /> <br />
+            <br /> <br /> <br /> <br />
             <input type="submit" class="btn-large btn-primary" value="Create Poll!" />
         </form>
     </div>
@@ -60,9 +63,10 @@
     <div class="span4">
         <h2>Search Polls</h2>
         <form action="{% url search %}" id="searchForm" method="get">
-            <label for="searchinput"> Search Term: </label>
-            <input type="text" name="q" id="searchinput" value="Enter your search here" />
-            <br />
+            <!--<label for="searchinput"> Search Term: </label>-->
+            <input type="text" name="q" id="searchinput" value="Enter Your Search Here" onblur="if(this.value == '')
+            {this.value = 'Enter Your Search Here';}" onfocus="if(this.value == 'Enter Your Search Here') {this.value =
+            '';}"/>
             <input type="submit" class="btn btn-primary" value="Search!" />
         </form>
     </div>
@@ -81,14 +85,17 @@
         input.name = "choice" + optionCount;
         input.id = "choice" + optionCount + "input";
         input.value = "Choice " + optionCount;
+        var input_value_bkup = input.value;
+        input.onblur = function() {if(this.value == '') {this.value = input_value_bkup;}};
+        input.onfocus = function() {if (this.value == input_value_bkup) {this.value = '';}};
 
         // Label
-        label = document.createElement("label");
-        label.htmlFor = input.id;
-        label.innerHTML = "Choice " + optionCount + " :";
+        //label = document.createElement("label");
+        //label.htmlFor = input.id;
+        //label.innerHTML = "Choice " + optionCount + " :";
 
         //Add the nodes
-        options.appendChild(label);
+        //options.appendChild(label);
         options.appendChild(input);
         options.appendChild(document.createElement("br"));
         optionCount++;
