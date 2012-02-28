@@ -69,7 +69,7 @@ def view(request, poll_id):
 
 def index(request):
     latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
-    popular_poll_list = Poll.objects.order_by('-id').distinct('-id')[:10]
+    popular_poll_list = Poll.objects.order_by('-total_votes')[:10]
     template = "index.html"
     return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list}, context_instance=RequestContext(request))
 
@@ -87,6 +87,7 @@ def vote(request, poll_id):
             vote = p.vote_set.get(hash=hash)
         except Vote.DoesNotExist:
             selected_choice.votes += 1
+            p.total_votes += 1
             selected_choice.save()
             p.vote_set.create(hash=hash)
 

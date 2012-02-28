@@ -12,11 +12,12 @@ class VoteInline(admin.TabularInline):
 class PollAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['question']}),
+        ('Total Votes', {'fields': ['total_votes']}),
         ('Date Created Info', {'fields': ['date_created']}),
         ('Date Expire Info', {'fields': ['date_expire']}),
     ]
     inlines = [ChoiceInline,VoteInline]
-    list_display = ('question', 'date_created', 'date_expire')
+    list_display = ('question', 'total_votes', 'date_created', 'date_expire')
     list_filter = ['date_created']
     search_fields = ['question']
 
