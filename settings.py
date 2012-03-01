@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'polls2',                      # Or path to database file if using sqlite3.
+        'NAME': 'polls',                      # Or path to database file if using sqlite3.
         'USER': 'polls',                      # Not used with sqlite3.
         'PASSWORD': 'polls',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -121,12 +121,17 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polls',
-    'haystack',
+    'haystack', #TODO Re-enable this
     'south', #For data migration
     # Uncomment the next line to enable the admin:
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+HAYSTACK_SITECONF = 'polling.search_sites'
+HAYSTACK_SEARCH_ENGINE = 'solr'
+HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
+
 
 HAYSTACK_CONNECTIONS = {
     'default': {
