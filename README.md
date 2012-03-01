@@ -9,7 +9,7 @@ How to install this project:
 
     ```python
     #Here is a sample local_settings.py
-    #No need for imports or anything, settings.py will bring it all in for you.
+    #No need for imports or anything, our own settings.py will bring it all in for you.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
