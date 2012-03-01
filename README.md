@@ -12,12 +12,13 @@ How to install this project:
     #No need for imports or anything, settings.py will bring it all in for you.
     DATABASES = {
         'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'name',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': '',
-        'PORT': '',
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'name',
+            'USER': 'user',
+            'PASSWORD': 'password',
+            'HOST': '',
+            'PORT': '',
+        }
     }
     ```
 7. Phew, you're good to go! Run: ./manage.py runserver 0.0.0.0:XXXX to confirm
