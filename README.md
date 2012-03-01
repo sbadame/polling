@@ -21,7 +21,7 @@ How to install this project:
         }
     }
     ```
-7. Phew, you're good to go! Run: ./manage.py runserver 0.0.0.0:XXXX to confirm
+7. Phew, you're good to go! Run: ```./manage.py runserver 0.0.0.0:XXXX``` to confirm
 
 Working with virtualenv
 ------------------------
