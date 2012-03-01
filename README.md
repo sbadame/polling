@@ -8,6 +8,7 @@ How to install this project:
         Here is a sample:
         #No need for imports or anything, settings.py will bring it all in for you.
 
+        ```python
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.mysql',
@@ -17,7 +18,7 @@ How to install this project:
                 'HOST': '',
                 'PORT': '',
             }
-        }
+        }```
     7) Phew, you're good to go! Run: ./manage.py runserver 0.0.0.0:XXXX to confirm
 
 
