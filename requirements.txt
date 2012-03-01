@@ -3,6 +3,6 @@ MySQL-python==1.2.3
 South==0.7.3
 distribute==0.6.24
 django-haystack==1.2.6
-django-pipeline==1.2-beta2
+django-pipeline==1.1.27
 pysolr==2.1.0-beta
 wsgiref==0.1.2

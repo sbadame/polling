@@ -142,6 +142,19 @@ HAYSTACK_CONNECTIONS = {
 
 }
 
+PIPELINE_CSS_COMPRESSOR = None
+PIPELINE_JS_COMPRESSOR = None
+PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
+import os
+PIPELINE_LESS_BINARY = os.path.dirname(__file__) + '/bin/less/bin/lessc'
+
+PIPELINE_CSS = {
+    'styles' : {
+        'source_filenames': ('polls/static/bootstrap/less/*.less',),
+        'output_filename': 'css/style.css',
+    }
+}
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
