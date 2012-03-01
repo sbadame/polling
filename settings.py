@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     'polls',
     'haystack', #TODO Re-enable this
     'south', #For data migration
+    'pipeline', #To compress and compile files like less
     # Uncomment the next line to enable the admin:
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
