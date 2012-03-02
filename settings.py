@@ -119,15 +119,11 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    #'django.contrib.staticfiles',
     'staticfiles',
     'polls',
     'haystack',
     'south', #For data migration
     'pipeline', #To compress and compile files like less
-    # Uncomment the next line to enable the admin:
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
 )
 
 HAYSTACK_SITECONF = 'polling.search_sites'
@@ -146,9 +142,7 @@ HAYSTACK_CONNECTIONS = {
 PIPELINE_CSS_COMPRESSOR = None
 PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
-import os
-local_path = lambda path: os.path.join(os.path.dirname(__file__), path)
-PIPELINE_LESS_BINARY = local_path('bin/less/bin/lessc')
+PIPELINE_LESS_BINARY = "/usr/bin/lessc"
 
 PIPELINE_CSS = {
     'custombootstrap' : {
