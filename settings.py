@@ -149,7 +149,6 @@ PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
 import os
 local_path = lambda path: os.path.join(os.path.dirname(__file__), path)
 PIPELINE_LESS_BINARY = local_path('bin/less/bin/lessc')
-#PIPELINE_LESS_BINARY = "/usr/bin/lessc"
 
 PIPELINE_CSS = {
     'custombootstrap' : {
