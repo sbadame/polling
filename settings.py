@@ -59,7 +59,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '.'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -80,9 +80,9 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'staticfiles.finders.FileSystemFinder',
+    'staticfiles.finders.AppDirectoriesFinder',
+    'staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -119,7 +119,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    #'django.contrib.staticfiles',
+    'staticfiles',
     'polls',
     'haystack', #TODO Re-enable this
     'south', #For data migration
@@ -146,12 +147,14 @@ PIPELINE_CSS_COMPRESSOR = None
 PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
 import os
-PIPELINE_LESS_BINARY = os.path.dirname(__file__) + '/bin/less/bin/lessc'
+#local_path = lambda path: os.path.join(os.path.dirname(__file__), path)
+#PIPELINE_LESS_BINARY = local_path('bin/less/bin/lessc')
+PIPELINE_LESS_BINARY = "/usr/bin/lessc"
 
 PIPELINE_CSS = {
-    'styles' : {
-        'source_filenames': ('polls/static/bootstrap/less/*.less',),
-        'output_filename': 'css/style.css',
+    'custombootstrap' : {
+        'source_filenames': ('polls/static/bootstrap/less/bootstrap.less',),
+        'output_filename': 'polls/static/bootstrap/less/bootstrap.css',
     }
 }
 
