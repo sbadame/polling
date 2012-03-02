@@ -122,7 +122,7 @@ INSTALLED_APPS = (
     #'django.contrib.staticfiles',
     'staticfiles',
     'polls',
-    'haystack', #TODO Re-enable this
+    'haystack',
     'south', #For data migration
     'pipeline', #To compress and compile files like less
     # Uncomment the next line to enable the admin:
