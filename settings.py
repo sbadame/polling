@@ -109,7 +109,6 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/sandro/Documents/personal/polling/templates",
 )
 
 INSTALLED_APPS = (
@@ -139,14 +138,12 @@ HAYSTACK_CONNECTIONS = {
 }
 
 PIPELINE_CSS_COMPRESSOR = None
-PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
 PIPELINE_LESS_BINARY = "/usr/bin/lessc"
-
 PIPELINE_CSS = {
     'custombootstrap' : {
         'source_filenames': ('polls/static/bootstrap/less/bootstrap.less',),
-        'output_filename': 'polls/static/bootstrap/less/bootstrap.css',
+        'output_filename': 'polls/static/pipelined/bootstrap.css',
     }
 }
 
