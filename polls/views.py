@@ -4,8 +4,9 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
 from polls.models import Poll,Choice,Vote
+import datetime
 import haystack
-
+import random
 import hashlib
 
 def request_hash(request):
@@ -70,8 +71,12 @@ def view(request, poll_id):
 def index(request):
     latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
     popular_poll_list = Poll.objects.order_by('-total_votes')[:10]
+    danger_poll_list = Poll.objects.filter(date_expire__gt=datetime.datetime.now()).order_by('date_expire')[:10]
+    rand_poll_id = random.randint(1,Poll.objects.count()-1)
+    random_poll = Poll.objects.get(id=rand_poll_id)
     template = "index.html"
-    return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list}, context_instance=RequestContext(request))
+    return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list,
+        'random_poll': random_poll, 'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)
