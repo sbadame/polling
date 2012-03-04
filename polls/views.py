@@ -68,12 +68,30 @@ def view(request, poll_id):
         template = "detail.html"
     return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
 
+def get_random_poll():
+    #In a perfect world, just picking a number from 0 -  Poll.objects.count() would work. Sadly
+    #polls get deleted. (Like poll 11 on my computer doesn't exist...)
+    #OK so we need a random, poll. Django gives us something for that: *.order_by('?'). Too bad
+    #its performance is utter garbage on mysql.
+    #So lets take the perro approach but wrap it a while loop to make sure that our id actually exists.
+    #TODO: make this handle the case of a sparse database better. (Or maybe it should encourage dense DBs)
+
+    poll_count = Poll.objects.count()
+    while True:
+        rand_poll_id = random.randint(1,poll_count-1)
+        try:
+            random_poll = Poll.objects.get(id=rand_poll_id)
+            return random_poll
+        except Poll.DoesNotExist:
+            #Darn it! Got a row that doesn't exist... try again...
+            pass
+
+
 def index(request):
     latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
     popular_poll_list = Poll.objects.order_by('-total_votes')[:10]
     danger_poll_list = Poll.objects.filter(date_expire__gt=datetime.datetime.now()).order_by('date_expire')[:10]
-    rand_poll_id = random.randint(1,Poll.objects.count()-1)
-    random_poll = Poll.objects.get(id=rand_poll_id)
+    random_poll = get_random_poll()
     template = "index.html"
     return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list,
         'random_poll': random_poll, 'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
