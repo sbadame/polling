@@ -74,18 +74,18 @@ function graph(element, data, overrides) {
         s.fontAttr = {font: s.fontSizePx + "px " + s.fontName, fill:"#333"};
     }
 
-    var paper = new Raphael(element, s.width, s.height);
-    var barWidth = Math.min(s.maxBarWidth, (s.width - s.barPadding*(data.length - 1)) / data.length);
-    var largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
+    paper = new Raphael(element, s.width, s.height);
+    barWidth = Math.min(s.maxBarWidth, (s.width - s.barPadding*(data.length - 1)) / data.length);
+    largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
 
     //Get the yaxis that fits our graph best
-    var maxY = s.yAxis[0];
-    var i = 0;
+    maxY = s.yAxis[0];
+    i = 0;
     while (i < s.yAxis.length && largestValue > s.yAxis[i]) {
         i++;
     }
     largestValue = s.yAxis[i];
-    var tickIndex = 0;
+    tickIndex = 0;
     while (tickIndex < (s.ticksAt.length - s.tickCount) && s.ticksAt[tickIndex] > largestValue) {
         tickIndex++;
     }
@@ -94,9 +94,9 @@ function graph(element, data, overrides) {
     //We can't set the y values for the bar yet because we don't know how tall the tallest one is.
     //Once we've gone through them all we can pick out the tallest one and then apply the y position
     //to all of these labels
-    var tallestLabel = -1;
-    var x = s.tickWidth;
-    var barLabels = new Array();
+    tallestLabel = -1;
+    x = s.tickWidth;
+    barLabels = new Array();
     for (i = 0; i < data.length; i++) {
          //Choice name label
          barLabel = paper.text();
@@ -109,22 +109,26 @@ function graph(element, data, overrides) {
 
     //Raphael seems to be giving a height for the text that is slightly shorter than the actual height. This causes
     //things like y's and g's to get cut off. My solution? Add a magical '4'. Why 4? Trial and error says that it works.
-    var labelYPos = s.height - (4+(tallestLabel/2));
+    labelYPos = s.height - (4+(tallestLabel/2));
     barLabels.map(function(barLabel){barLabel.attr({y: labelYPos});});
 
     //Start the bars at the position of the text labels and the move up by the amount of label padding
     //Since the labelYPos has Y in the middle of the text object (Raphael doesn't support setting vertical alignment
     //yet) we need to move up (subtract) one half of the height of tallest label to get where we need.
     //Also the magic constant of 4 needs to make a reappearence.
-    var startBarHeight = labelYPos - (4+tallestLabel/2) - s.labelPadding;
-    var endBarHeight = s.height - (startBarHeight + s.labelPadding + s.fontSizePx/2);
-    var tickSize = (startBarHeight - endBarHeight)/largestValue;
+    startBarHeight = labelYPos - (4+tallestLabel/2) - s.labelPadding;
+    endBarHeight = s.height - (startBarHeight + s.labelPadding + s.fontSizePx/2);
+    tickSize = (startBarHeight - endBarHeight)/largestValue;
 
     //Draw a line across the bottom starting from x=0 to x=s.width at the bar's bottom
-    var bottomLine = "M {0} {1} l {2} 0".format(s.tickWidth, startBarHeight, s.width);
+    bottomLine = "M {0} {1} l {2} 0".format(s.tickWidth, startBarHeight, s.width);
     paper.path(bottomLine);
 
-    var maxTick = -1;
+    //Draw a line on the right side to the top
+    rightSideLine = "M {0} 0 l 0 {1}".format(s.width, startBarHeight);
+    paper.path(rightSideLine);
+
+    maxTick = -1;
     for(tick = 0; tick <= largestValue; tick++) {
         for(tickLevel = 0; tickLevel < s.tickCount; tickLevel++) {
             if ( (tick % s.ticksAt[tickLevel+tickIndex]) === 0) {//Yes this is correct THREE equals signs. Javascript, wtf are you??
@@ -137,9 +141,10 @@ function graph(element, data, overrides) {
                 } else if (tickLevel === 1) {
                     label.attr("font-weight", "bold");
                 }
-                var tickWidth = label.getBBox().width;
-                maxTick = Math.max(maxTick, tickWidth);
-                var axisLine = "M {0} {1} l {2} 0".format(tickWidth, height, s.tickWidth-tickWidth);
+                var tickLabelWidth = label.getBBox().width;
+                maxTick = Math.max(maxTick, tickLabelWidth);
+                //var axisLine = "M {0} {1} l {2} 0".format(tickLabelWidth, height, s.tickWidth-tickLabelWidth);
+                var axisLine = "M {0} {1} l {2} 0".format(tickLabelWidth, height, s.width);
                 paper.path(axisLine);
                 break;
             }
