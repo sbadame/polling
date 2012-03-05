@@ -1,7 +1,7 @@
 # Django settings for polls project.
 
-import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
+#import logging
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

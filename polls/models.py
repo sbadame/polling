@@ -20,9 +20,12 @@ from django.db import models
 #       5.) Run "./manage.py migrate polls"
 
 class Poll(models.Model):
+    time_delta_to_expire = datetime.timedelta(weeks=1)
     question = models.CharField(max_length=200)
     date_created = models.DateTimeField('date_created')
-    date_expire = models.DateTimeField('date_expire', default=datetime.datetime.now() + datetime.timedelta(weeks=1))
+    date_expire = models.DateTimeField(
+            'date_expire',
+            default=datetime.datetime.now() + time_delta_to_expire)
     total_votes = models.IntegerField(default=0)
 
     def results(self):
