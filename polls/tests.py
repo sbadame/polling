@@ -26,6 +26,10 @@ class PollTestCase(TestCase):
         poll = Poll.create(question, choice1, choice2)
 
         self.assertEqual(question, poll.question)
+        #Next two methods should throw an exception if the choice doesn't exist.
+        poll.choice_set.get(choice=choice1)
+        poll.choice_set.get(choice=choice2)
+        self.assertEqual(2, poll.choice_set.count())
 
     def test_new_poll_has_expired(self):
         self.assertFalse(self.new_poll.has_expired())
