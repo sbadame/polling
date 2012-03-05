@@ -12,22 +12,23 @@ import datetime
 class PollTestCase(TestCase):
     def setUp(self):
 
-        # Plain old new poll
-        self.new_poll = Poll.create(
-                question="New Poll",
-                date_created=datetime.datetime.now())
-        self.new_poll.choice_set.create(choice="Choice1", votes=0)
-        self.new_poll.choice_set.create(choice="Choice2", votes=0)
-        self.new_poll.choice_set.create(choice="Choice3", votes=0)
+        self.new_poll = Poll.create("New Poll", "Choice1", "Choice2", "Choice3")
 
         #An expired poll
         self.expiration_length = Poll.time_delta_to_expire + datetime.timedelta(days=1)
-        self.expired_poll = Poll.create(
-                question="Expired Poll",
+        self.expired_poll = Poll.create("Expired Poll", "Choice1", "Choice2", "Choice3",
                 date_created=datetime.datetime.now() - self.expiration_length)
         self.expired_poll.choice_set.create(choice="Choice1", votes=0)
         self.expired_poll.choice_set.create(choice="Choice2", votes=0)
         self.expired_poll.choice_set.create(choice="Choice3", votes=0)
+
+    def test_create(self):
+        question = "A Generic Name"
+        choice1 = "A Choice"
+        choice2 = "A Second Choice"
+        poll = Poll.create(question, choice1, choice2)
+
+        self.assertEqual(question, poll.question)
 
     def test_new_poll_has_expired(self):
         self.assertFalse(self.new_poll.has_expired())

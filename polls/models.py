@@ -29,9 +29,19 @@ class Poll(models.Model):
     total_votes = models.IntegerField(default=0)
 
     @staticmethod
-    def create(**kwargs):
+    def create(question, *choices, **kwargs):
         """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
         Time for some design patterns up in this bitch. Factory method: GO!!"""
+
+        if not question or not choices:
+            raise ValueError("Both question: %s and choices: %s must be defined" % (question, choices))
+
+        if len(choices) < 2:
+            raise ValueError("Poll can't have less than two choices: %s" % choices)
+
+        if "question" in kwargs:
+            raise ValueError("Can't define question twice arg: \"%s\", question=\"%s\"" % (question,
+                kwargs["question"]))
 
         if "date_created" not in kwargs:
             kwargs["date_created"] = datetime.datetime.now()
@@ -39,7 +49,7 @@ class Poll(models.Model):
         if "date_expire" not in kwargs:
             kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
 
-        return Poll.objects.create(**kwargs)
+        return Poll.objects.create(question=question, **kwargs)
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]
