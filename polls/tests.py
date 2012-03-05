@@ -30,17 +30,8 @@ class PollTestCase(TestCase):
 
 
     def test_has_expired(self):
-        """Correctly determine if a poll is expired or not"
+        """Correctly determine if a poll is expired or not"""
         self.assertFalse(self.new_poll.has_expired())
         self.assertTrue(self.expired_poll.has_expired())
 
 
-
-"""
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-
-        self.assertEqual(1 + 1, 2)
-"""
