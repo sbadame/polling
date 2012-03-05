@@ -49,7 +49,12 @@ class Poll(models.Model):
         if "date_expire" not in kwargs:
             kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
 
-        return Poll.objects.create(question=question, **kwargs)
+        newpoll = Poll.objects.create(question=question, **kwargs)
+
+        for choice in choices:
+            newpoll.choice_set.create(choice=choice, votes=0)
+
+        return newpoll
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]

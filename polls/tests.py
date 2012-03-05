@@ -18,9 +18,6 @@ class PollTestCase(TestCase):
         self.expiration_length = Poll.time_delta_to_expire + datetime.timedelta(days=1)
         self.expired_poll = Poll.create("Expired Poll", "Choice1", "Choice2", "Choice3",
                 date_created=datetime.datetime.now() - self.expiration_length)
-        self.expired_poll.choice_set.create(choice="Choice1", votes=0)
-        self.expired_poll.choice_set.create(choice="Choice2", votes=0)
-        self.expired_poll.choice_set.create(choice="Choice3", votes=0)
 
     def test_create(self):
         question = "A Generic Name"
