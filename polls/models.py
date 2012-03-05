@@ -22,11 +22,24 @@ from django.db import models
 class Poll(models.Model):
     time_delta_to_expire = datetime.timedelta(weeks=1)
     question = models.CharField(max_length=200)
-    date_created = models.DateTimeField('date_created')
+    date_created = models.DateTimeField('date_created', default=datetime.datetime.now())
     date_expire = models.DateTimeField(
             'date_expire',
-            default=datetime.datetime.now() + time_delta_to_expire)
+            default = datetime.datetime.now() + time_delta_to_expire)
     total_votes = models.IntegerField(default=0)
+
+    @staticmethod
+    def create(**kwargs):
+        """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
+        Time for some design patterns up in this bitch. Factory method: GO!!"""
+
+        if "date_created" not in kwargs:
+            kwargs["date_created"] = datetime.datetime.now()
+
+        if "date_expire" not in kwargs:
+            kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
+
+        return Poll.objects.create(**kwargs)
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]
@@ -39,7 +52,11 @@ class Poll(models.Model):
         return ('polls.views.view', (), {'poll_id':self.id})
 
     def __unicode__(self):
-        return self.question
+        return "%s(id=%d,question=\"%s\",expires=%s)" % (
+            self.__class__.__name__,
+            self.id,
+            self.question,
+            self.date_expire)
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
