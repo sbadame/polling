@@ -36,16 +36,15 @@
         <div id="canvas_container"></div>
     </div>
     </div>
-
 <div class="row">
     <div class="span4">
         {% if latest_poll_list %}
             <h2>Newest Polls</h2>
-            <ol>
+            <ul>
                 {% for poll in latest_poll_list %}
                 <li><a href="{{ poll.get_absolute_url }}">{{ poll.question }}</a></li>
                 {% endfor %}
-            </ol>
+            </ul>
         {% endif %}
     </div>
     <div class="span4">

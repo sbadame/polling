@@ -113,5 +113,6 @@ def vote(request, poll_id):
             p.total_votes += 1
             selected_choice.save()
             p.vote_set.create(hash=hash)
+            p.save()
 
     return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
