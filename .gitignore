@@ -1,3 +1,5 @@
+solr/example/solr/data/
+solr/example/work/
 venv
 local_settings.py
 *.pyc

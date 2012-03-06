@@ -54,10 +54,11 @@ def create(request):
             {'error_message':"You did not supply enough choices"},\
             context_instance = RequestContext(request))
     else:
-        p = Poll(question=question, date_created=datetime.datetime.now())
-        p.save()
-        for choice in choices:
-            p.choice_set.create(choice=choice, votes=0)
+        p = Poll.create(question, *choices)
+        #p = Poll(question=question, date_created=datetime.datetime.now())
+        #p.save()
+        #for choice in choices:
+            #p.choice_set.create(choice=choice, votes=0)
         return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
 def view(request, poll_id):
