@@ -1,7 +1,7 @@
 # Django settings for polls project.
 
-#import logging
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -26,7 +26,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-        'LOCATION': 'unix:/tmp/memcached',
+        'LOCATION': '127.0.0.1:11211',
     }
 }
 
