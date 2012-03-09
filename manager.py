@@ -17,9 +17,7 @@ def mysql():
     pass
 
 def memcached():
-    out, err = run("memcached")
-    if out or err:
-        error("memcached: %s" % out, err)
+    run("memcached", waitForExit=False)
 
 def solr():
     out, err = run("java -jar start.jar", waitFor="Started", cwd="solr/example")
@@ -47,17 +45,27 @@ def update():
         error("You need to run 'workon polling'")
 
     run("pip install -r requirements.txt")
+    run("python manage.py migrate polls")
+
 
 def error(msg, err=""):
     print(msg)
     print(err)
     sys.exit(-1)
 
-def run(cmd, waitFor=None, **kwargs):
+def run(cmd, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs):
     print(("Running: %s" % cmd,))
     p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
     print(" has pid: %d" % p.pid)
-    if waitFor:
+
+    if waitForExit:
+        out,err = p.communicate()
+        sys.stdout.write(out)
+        sys.stderr.write(err)
+        return out,err
+
+    else:
+
         #From stackoverflow non-blocking reading
         #http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python
         from threading import Thread
@@ -78,14 +86,22 @@ def run(cmd, waitFor=None, **kwargs):
         err_thread.daemon = True
         err_thread.start()
 
-        doneWaiting = False
-        while not doneWaiting:
+        import time
+        start_time = time.clock()
+
+        def keeploop():
+            if waitFor:
+                return True
+            else:
+                return time.clock() - start_time <= waitSeconds
+
+        while keeploop():
             try: line = out_queue.get_nowait()
             except Empty:
                 pass
             else:
                 sys.stdout.write(line)
-                if waitFor in line:
+                if waitFor and waitFor in line:
                     break
 
             try: line = err_queue.get_nowait()
@@ -93,15 +109,14 @@ def run(cmd, waitFor=None, **kwargs):
                 pass
             else:
                 sys.stderr.write(line)
-                if waitFor in line:
+                if waitFor and waitFor in line:
                     break
 
-        return ('', '')
-    else:
-        out,err = p.communicate()
-        sys.stdout.write(out)
-        sys.stderr.write(err)
-    return out,err
+        if not p.poll() is None: #The process should not have terminated...
+            error("command: %s with pid: %d terminated with exit code: %d" % (cmd, p.pid, p.returncode))
+
+        return None
+
 
 
 if __name__ == "__main__":
