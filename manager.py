@@ -30,6 +30,7 @@ def start_app():
 def update():
     out,err = run('git status')
     if not out.endswith("(working directory clean)\n"):
+        print(err)
         error("Cannot update with dirty working directory. Commit or revert changes")
     out,err = run('git pull')
 
