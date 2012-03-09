@@ -46,7 +46,7 @@ def error(msg, err=""):
     sys.exit(-1)
 
 def run(cmd):
-    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return p.communicate()
 
 
