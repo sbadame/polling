@@ -37,7 +37,7 @@ def update():
         error("Couldn't merge:\n%s" % out, err)
 
     if "VIRTUAL_ENV" not in os.environ or not os.environ["VIRTUAL_ENV"] or os.environ["VIRTUAL_ENV"] != "polling":
-        run("workon polling", shell=True)
+        run("workon polling")
 
 def error(msg, err=""):
     print(msg)
@@ -45,7 +45,7 @@ def error(msg, err=""):
     sys.exit(-1)
 
 def run(cmd):
-    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     return p.communicate()
 
 
