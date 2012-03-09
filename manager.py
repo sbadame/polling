@@ -37,7 +37,7 @@ def update():
         error("Couldn't merge:\n%s" % out, err)
 
     if "VIRTUAL_ENV" not in os.environ or not os.environ["VIRTUAL_ENV"] or os.environ["VIRTUAL_ENV"] != "polling":
-        run("workon polling")
+        run("workon polling", shell=True)
 
 def error(msg, err=""):
     print(msg)
