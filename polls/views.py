@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
-from polls.models import Poll,Choice,Vote
+from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote
 import datetime
 import haystack
 import random
@@ -54,12 +54,19 @@ def create(request):
             {'error_message':"You did not supply enough choices"},\
             context_instance = RequestContext(request))
     else:
-        p = Poll.create(question, *choices)
-        #p = Poll(question=question, date_created=datetime.datetime.now())
-        #p.save()
-        #for choice in choices:
-            #p.choice_set.create(choice=choice, votes=0)
-        return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+        if request.POST['pub_priv'] == 'Private':
+            p = Private_Poll.create(question, *choices)
+            time_hash = datetime.datetime.now()
+            p.private_hash = time_hash.year + time_hash.month + time_hash.day + time_hash.hour + time_hash.minute + time_hash.second + time_hash.microsecond
+            p.save()
+            return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+        else:
+            p = Public_Poll.create(question, *choices)
+            #p = Poll(question=question, date_created=datetime.datetime.now())
+            #p.save()
+            #for choice in choices:
+                #p.choice_set.create(choice=choice, votes=0)
+            return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
 def view(request, poll_id):
     poll = get_object_or_404(Poll, pk=poll_id)
@@ -89,13 +96,13 @@ def get_random_poll():
 
 
 def index(request):
-    latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
-    popular_poll_list = Poll.objects.order_by('-total_votes')[:10]
-    danger_poll_list = Poll.objects.filter(date_expire__gt=datetime.datetime.now()).order_by('date_expire')[:10]
+    latest_poll_list = Public_Poll.objects.all().order_by('-date_created')[:10]
+    popular_poll_list = Public_Poll.objects.order_by('-total_votes')[:10]
+    danger_poll_list = Public_Poll.objects.filter(date_expire__gt=datetime.datetime.now()).order_by('date_expire')[:10]
     random_poll = get_random_poll()
     template = "index.html"
     return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list,
-        'random_poll': random_poll, 'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
+        'random_poll': random_poll,'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
 
 def vote(request, poll_id):
     p = get_object_or_404(Poll, pk=poll_id)

@@ -73,6 +73,69 @@ class Poll(models.Model):
             self.question,
             self.date_expire)
 
+
+class Public_Poll(Poll):
+    @staticmethod
+    def create(question, *choices, **kwargs):
+        """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
+        Time for some design patterns up in this bitch. Factory method: GO!!"""
+
+        if not question or not choices:
+            raise ValueError("Both question: %s and choices: %s must be defined" % (question, choices))
+
+        if len(choices) < 2:
+            raise ValueError("Poll can't have less than two choices: %s" % choices)
+
+        if "question" in kwargs:
+            raise ValueError("Can't define question twice arg: \"%s\", question=\"%s\"" % (question,
+                kwargs["question"]))
+
+        if "date_created" not in kwargs:
+            kwargs["date_created"] = datetime.datetime.now()
+
+        if "date_expire" not in kwargs:
+            kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
+
+        newpoll = Public_Poll.objects.create(question=question, **kwargs)
+        
+        for choice in choices:
+            newpoll.choice_set.create(choice=choice, votes=0)
+
+        return newpoll
+    
+    public_hash = models.IntegerField(default=0)
+
+class Private_Poll(Poll):
+    @staticmethod
+    def create(question, *choices, **kwargs):
+        """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
+        Time for some design patterns up in this bitch. Factory method: GO!!"""
+
+        if not question or not choices:
+            raise ValueError("Both question: %s and choices: %s must be defined" % (question, choices))
+
+        if len(choices) < 2:
+            raise ValueError("Poll can't have less than two choices: %s" % choices)
+
+        if "question" in kwargs:
+            raise ValueError("Can't define question twice arg: \"%s\", question=\"%s\"" % (question,
+                kwargs["question"]))
+
+        if "date_created" not in kwargs:
+            kwargs["date_created"] = datetime.datetime.now()
+
+        if "date_expire" not in kwargs:
+            kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
+
+        newpoll = Private_Poll.objects.create(question=question, **kwargs)
+
+        for choice in choices:
+            newpoll.choice_set.create(choice=choice, votes=0)
+
+        return newpoll
+    
+    private_hash = models.CharField(max_length=200)
+
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
     choice = models.CharField(max_length=200)

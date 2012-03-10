@@ -10,6 +10,9 @@
         {% endif %}
         <form action="/create" id="pollForm" method="post">
             {% csrf_token %}
+            <input type="radio" name="pub_priv" value="Public" checked>Make Public Poll <br>
+            <input type="radio" name="pub_priv" value="Private">Make Private Poll<br><br>
+
             <!--<label for="questioninput"> Question: </label>-->
             <input type="text" name="question" id="questioninput" value="Enter Your Question Here" onblur="if
             (this.value == '') {this.value = 'Enter Your Question Here';}" onfocus="if (this.value == 'Enter Your Question Here') {this.value = '';}" />
