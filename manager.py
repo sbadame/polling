@@ -15,7 +15,7 @@ def mysql():
     pass
 
 def memcached():
-    args = setting("memcached_args", "")
+    args = setting("MEMCACHED_ARGS", "")
     run("memcached " + args, "memcached", waitForExit=False)
 
 def solr():
