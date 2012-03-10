@@ -4,36 +4,53 @@ from __future__ import print_function
 import os
 import subprocess
 import sys
+import local_settings
 
 tempfile = ".managerprocs"
 persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
 
-usage = """usage: [mysql|memcache|solr|start|update]
-    mysql:
-    memcache:
-    solr:
-    start:
-    update:
-"""
-
+setting = lambda name, default: default if not name in dir(local_settings) else local_settings.__dict__.get(name)
 
 def mysql():
     pass
 
 def memcached():
-    run("memcached", name="memcached", waitForExit=False)
+    args = setting("memcached_args", "")
+    run("memcached " + args, "memcached", waitForExit=False)
 
 def solr():
-    out, err = run("java -jar start.jar", waitFor="Started", cwd="solr/example")
+    run("java -jar start.jar", waitFor="Started", cwd="solr/example")
 
 def runserver():
     run("python manage.py runserver 0.0.0.0:2869", waitSeconds=3, waitForExit=False)
 
 def start_app():
-    mysql()
-    memcached()
-    solr()
-    runserver()
+    startApp(mysql)
+    startApp(memcached)
+    startApp(solr)
+    startApp(runserver)
+
+def startApp(command):
+    name = command.__name__
+    if app_pid(name):
+        print("%s is already running with pid: %d" % (name, app_pid(name)))
+    else:
+        command()
+
+def killApp(command):
+    name = command.__name__
+    pid = app_pid(name)
+    if pid:
+        run("kill %d" % pid)
+    else:
+        error("Don't have a pid for %s" % name)
+
+def app_pid(command):
+    name = command.__name__
+    if name in persisted:
+        if "pid" in persisted[name]:
+            return persisted[name]["pid"]
+    return None
 
 def update():
     out,err = run('git status')
@@ -128,8 +145,8 @@ def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs)
         sys.stdout.flush()
         sys.stderr.flush()
         if not p.poll() is None: #The process should not have terminated...
-            error("command: \"%s\" with pid: %d exited with exit code: %d" % (cmd, p.pid, p.returncode))
             if name: updatepid(name, None)
+            error("command: \"%s\" with pid: %d exited with exit code: %d" % (cmd, p.pid, p.returncode))
 
         return None
 
@@ -147,12 +164,16 @@ def updatepid(name, pid):
     f.close()
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='Does all of the ugly shell crap')
-    parser.add_argument('action', choices=["start", "stop", "update", "restart"])
-    parser.add_argument('program', choices=["update", "runserver", "update", "mysql", "memcached", "solr"])
-    parser.add_argument('args', nargs='*')
-    args = vars(parser.parse_args(sys.argv[1:]))
-    if args["program"] in globals():
-        globals()[args["program"]](*args['args'])
+    args = sys.argv[1:]
+    if args[0] not in "start,stop,update,restart".split(","):
+        raise ValueError("Don't understand command: %s" % args[0])
+
+    if args[0] != "update" and args[1] not in "runserver,mysql,memcached,solr".split(","):
+        raise ValueError("Don't understand program: %s" % args[1])
+
+    if args[0] == "update":
+        update()
+        exit()
+
+    globals()[args[1]]()
 
