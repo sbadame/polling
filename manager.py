@@ -16,34 +16,36 @@ def mysql():
 
 def memcached():
     args = setting("MEMCACHED_ARGS", "")
-    run("memcached " + args, "memcached", waitForExit=False)
+    run("memcached " + args, name="memcached", waitForExit=False)
 
 def solr():
-    run("java -jar start.jar", waitFor="Started", cwd="solr/example")
+    run("java -jar start.jar", name="solr", waitFor="Started", cwd="solr/example")
 
 def runserver():
-    run("python manage.py runserver 0.0.0.0:2869", waitSeconds=3, waitForExit=False)
+    run("python manage.py runserver 0.0.0.0:2869", name="server", waitSeconds=3, waitForExit=False)
 
-def start_app():
+def start_all():
     startApp(mysql)
     startApp(memcached)
     startApp(solr)
     startApp(runserver)
+    import time
+    time.sleep(60)
 
 def startApp(command):
     name = command.__name__
-    if app_pid(name):
-        print("%s is already running with pid: %d" % (name, app_pid(name)))
+    if app_pid(command):
+        print("%s is already running with pid: %d" % (name, app_pid(command)))
     else:
         command()
 
 def killApp(command):
-    name = command.__name__
-    pid = app_pid(name)
+    pid = app_pid(command)
     if pid:
         run("kill %d" % pid)
+        updatepid(command.__name__, None)
     else:
-        error("Don't have a pid for %s" % name)
+        error("Don't have a pid for %s" % command.__name__)
 
 def app_pid(command):
     name = command.__name__
@@ -165,15 +167,23 @@ def updatepid(name, pid):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args[0] not in "start,stop,update,restart".split(","):
+    if args[0] not in "start,kill,update,restart".split(","):
         raise ValueError("Don't understand command: %s" % args[0])
 
-    if args[0] != "update" and args[1] not in "runserver,mysql,memcached,solr".split(","):
+    if args[0] != "update" and args[1] not in "runserver,mysql,memcached,solr,all".split(","):
         raise ValueError("Don't understand program: %s" % args[1])
 
     if args[0] == "update":
         update()
         exit()
 
-    globals()[args[1]]()
+    if args[0] == "start" and args[1] == "all":
+        start_all()
+        exit()
+
+    command = globals()[args[1]]
+    if args[0] == "kill":
+        killApp(command)
+    else:
+        command()
 
