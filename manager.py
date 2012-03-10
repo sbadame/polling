@@ -5,6 +5,9 @@ import os
 import subprocess
 import sys
 
+tempfile = ".managerprocs"
+persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
+
 usage = """usage: [mysql|memcache|solr|start|update]
     mysql:
     memcache:
@@ -18,7 +21,7 @@ def mysql():
     pass
 
 def memcached():
-    run("memcached", waitForExit=False)
+    run("memcached", name="memcached", waitForExit=False)
 
 def solr():
     out, err = run("java -jar start.jar", waitFor="Started", cwd="solr/example")
@@ -48,15 +51,17 @@ def update():
     run("pip install -r requirements.txt")
     run("python manage.py migrate polls")
 
-
 def error(msg, err=""):
     print("OUT: %s\nERR: %s" % (msg,err))
     sys.exit(-1)
 
-def run(cmd, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs):
+def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs):
     print("Running: %s" % cmd, end="")
-    p = subprocess.Popen(cmd.split(' '), **kwargs)
+
+    p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr = subprocess.PIPE, **kwargs)
     print(" has pid: %d" % p.pid)
+
+    if name: updatepid(name, p.pid)
 
     if not waitFor and waitForExit:
         out,err = p.communicate()
@@ -124,13 +129,28 @@ def run(cmd, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs):
         sys.stderr.flush()
         if not p.poll() is None: #The process should not have terminated...
             error("command: \"%s\" with pid: %d exited with exit code: %d" % (cmd, p.pid, p.returncode))
+            if name: updatepid(name, None)
 
         return None
+
+def updatepid(name, pid):
+    old = {}
+    if name in persisted:
+        old = persisted[name]
+    else:
+        persisted["name"] = {}
+    old.update({"pid": pid})
+    persisted[name] = old
+
+    f = open(tempfile, "w")
+    f.write("%r" % persisted)
+    f.close()
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Does all of the ugly shell crap')
-    parser.add_argument('program', choices=["runserver", "update", "mysql", "memcached", "solr"])
+    parser.add_argument('action', choices=["start", "stop", "update", "restart"])
+    parser.add_argument('program', choices=["update", "runserver", "update", "mysql", "memcached", "solr"])
     parser.add_argument('args', nargs='*')
     args = vars(parser.parse_args(sys.argv[1:]))
     if args["program"] in globals():
