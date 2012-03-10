@@ -1,7 +1,7 @@
 # Django settings for polls project.
 
-#import logging
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -20,6 +20,13 @@ DATABASES = {
         'PASSWORD': 'polls',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
     }
 }
 
