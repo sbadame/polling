@@ -11,9 +11,6 @@ persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
 
 setting = lambda name, default: default if not name in dir(local_settings) else local_settings.__dict__.get(name)
 
-def mysql():
-    pass
-
 def memcached():
     args = setting("MEMCACHED_ARGS", "")
     run("memcached " + args, name="memcached", waitForExit=False)
@@ -22,15 +19,24 @@ def solr():
     run("java -jar start.jar", name="solr", waitFor="Started", cwd="solr/example")
 
 def runserver():
-    run("python manage.py runserver 0.0.0.0:2869", name="server", waitSeconds=3, waitForExit=False)
+    print("START PID: " + str(os.getpid()))
+    # Really python? This is the only way to launch a non-child proc?
+    pid = os.fork()
+
+    if pid == 0:
+        print("IN THE CHILD PID: " + str(os.getpid()))
+        os.execvp("python", ["", "manage.py", "runserver", "0.0.0.0:2869"])
+    else:
+        print("PARENT PID: " + str(os.getpid()))
+        print("CHILD PID: " + str(pid))
+        updatepid("runserver", pid)
+
+    #run(, name="server", waitSeconds=3, waitForExit=False)
 
 def start_all():
-    startApp(mysql)
     startApp(memcached)
     startApp(solr)
     startApp(runserver)
-    import time
-    time.sleep(60)
 
 def startApp(command):
     name = command.__name__
@@ -51,7 +57,19 @@ def app_pid(command):
     name = command.__name__
     if name in persisted:
         if "pid" in persisted[name]:
-            return persisted[name]["pid"]
+            # A long-winded way of doing: ps -ef | grep <pid> | grep -v grep
+            # To find out if proc with the given pid is alive
+            pid = persisted[name]["pid"]
+            p1 = subprocess.Popen(["ps", "-ef"], stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["grep", str(pid)], stdin=p1.stdout, stdout=subprocess.PIPE)
+            p3 = subprocess.Popen(["grep", "-v", "grep"], stdin=p2.stdout, stdout=subprocess.PIPE)
+            p1.stdout.close()
+            p2.stdout.close()
+            out, err = p3.communicate()
+            if str(pid) in out:
+                return pid
+            else:
+                updatepid(name, None)
     return None
 
 def update():
@@ -167,7 +185,7 @@ def updatepid(name, pid):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args[0] not in "start,kill,update,restart".split(","):
+    if args[0] not in "stat,start,kill,update,restart".split(","):
         raise ValueError("Don't understand command: %s" % args[0])
 
     if args[0] != "update" and args[1] not in "runserver,mysql,memcached,solr,all".split(","):
@@ -179,6 +197,15 @@ if __name__ == "__main__":
 
     if args[0] == "start" and args[1] == "all":
         start_all()
+        exit()
+
+    if args[0] == "stat":
+        if args[1] == "all":
+            for cmd in [runserver, solr, memcached]:
+                print(cmd.__name__ + ": " + str(app_pid(cmd)))
+        else:
+            command = globals()[args[1]]
+            print(app_pid(command))
         exit()
 
     command = globals()[args[1]]
