@@ -75,22 +75,3 @@ class PollViewTestCase(TestCase):
         self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
         self.assertEquals(1, p.total_votes)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
