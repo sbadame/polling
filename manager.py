@@ -1,5 +1,17 @@
 #!/usr/bin/env python2.7
 
+
+# Usage: 
+#  update
+#    pulls changes, updates pip, applies the db migrations
+#  start [runserver|solr|memcached|all]
+#    starts up each respective process, all starts them all
+#  kill [runserver|solr|memcached]
+#    kills the respective process (only guarenteed to work if it was started with this script. Might work otherwise, but no guarentees)
+#  stat [runserver|solr|memcached|all]
+#    prints the pid of each process. Prints None if that process isn't running. Passing no args to stats is the same as "all"
+#
+
 from __future__ import print_function
 import os
 import subprocess
