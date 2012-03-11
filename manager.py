@@ -181,7 +181,8 @@ if __name__ == "__main__":
     if args[0] not in "stat,start,kill,update,restart".split(","):
         raise ValueError("Don't understand command: %s" % args[0])
 
-    if args[0] != "update" and args[1] not in "runserver,mysql,memcached,solr,all".split(","):
+
+    if args[0] != "update" and len(args) > 1 and args[1] not in "runserver,mysql,memcached,solr,all".split(","):
         raise ValueError("Don't understand program: %s" % args[1])
 
     if args[0] == "update":
@@ -193,7 +194,7 @@ if __name__ == "__main__":
         exit()
 
     if args[0] == "stat":
-        if args[1] == "all":
+        if len(args) < 2 or args[1] == "all":
             for cmd in [runserver, solr, memcached]:
                 print(cmd.__name__ + ": " + str(app_pid(cmd)))
         else:
