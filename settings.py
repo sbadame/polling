@@ -171,6 +171,16 @@ LOGGING = {
     }
 }
 
+
+#Write our pid for the manager...
+tempfile = ".managerprocs"
+import os
+persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
+persisted["runserver"]["pid"] = os.getpid()
+f = open(tempfile, "w")
+f.write("%r" % persisted)
+f.close()
+
 try:
     from local_settings import *
 except ImportError:

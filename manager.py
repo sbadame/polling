@@ -19,19 +19,12 @@ def solr():
     run("java -jar start.jar", name="solr", waitFor="Started", cwd="solr/example")
 
 def runserver():
-    print("START PID: " + str(os.getpid()))
     # Really python? This is the only way to launch a non-child proc?
     pid = os.fork()
-
     if pid == 0:
-        print("IN THE CHILD PID: " + str(os.getpid()))
         os.execvp("python", ["", "manage.py", "runserver", "0.0.0.0:2869"])
     else:
-        print("PARENT PID: " + str(os.getpid()))
-        print("CHILD PID: " + str(pid))
         updatepid("runserver", pid)
-
-    #run(, name="server", waitSeconds=3, waitForExit=False)
 
 def start_all():
     startApp(memcached)
@@ -205,7 +198,7 @@ if __name__ == "__main__":
                 print(cmd.__name__ + ": " + str(app_pid(cmd)))
         else:
             command = globals()[args[1]]
-            print(app_pid(command))
+            print(command.__name__ + ": " + str(app_pid(command)))
         exit()
 
     command = globals()[args[1]]

@@ -110,7 +110,7 @@ def vote(request, poll_id):
     if not p.has_expired():
         hash = request_hash(request)
         try:
-            vote = p.vote_set.get(hash=hash)
+            p.vote_set.get(hash=hash)
         except Vote.DoesNotExist:
             selected_choice.votes += 1
             p.total_votes += 1
