@@ -98,21 +98,22 @@ def index(request):
         'random_poll': random_poll, 'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
 
 def vote(request, poll_id):
-    p = get_object_or_404(Poll, pk=poll_id)
+    poll = get_object_or_404(Poll, pk=poll_id)
     try:
-        selected_choice = p.choice_set.get(pk=request.POST['choice'])
+        selected_choice = poll.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
-        return render_to_response('detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
+        return render_to_response('detail.html', {'poll':poll, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
-    if not p.has_expired():
+    if not poll.has_expired():
         hash = request_hash(request)
         try:
-            vote = p.vote_set.get(hash=hash)
+            poll.vote_set.get(hash=hash)
         except Vote.DoesNotExist:
+            poll.total_votes += 1
             selected_choice.votes += 1
-            p.total_votes += 1
+            poll.vote_set.create(hash=hash)
             selected_choice.save()
-            p.vote_set.create(hash=hash)
+            poll.save()
 
-    return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+    return HttpResponseRedirect(reverse('poll_view',args=(poll.id,)))
