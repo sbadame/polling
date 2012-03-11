@@ -1,5 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>About</h2>
-        <p>Does anybody even really give a shit about the 'about' page?</p>
+<div class="container">
+    <div class="row-fluid">
+        <div class="span6">
+            <h2>The Guys</h2>
+            <div class="row-fluid">
+                <div class="span6">
+                    <h3>Sandro</h3>
+                        <dl>
+                            <dt>Name</dt>
+                            <dd>Sandro Badame</dd>
+                            <dt>Email</dt>
+                            <dd>sbadame+gimmeapoll@gmail.com</dd>
+                            <dt>Real Job</dt>
+                            <dd>A small search engine named Google</dd>
+                            <dt>Interests</dt>
+                            <dd>Painfully managing an Arch box, being a dick, and riding a bike</dd>
+                        </dl>
+                </div>
+                <div class="span6">
+                    <h3>Perro</h3>
+                    <dl>
+                        <dt>Name</dt>
+                        <dd>Chris Perro</dd>
+                        <dt>Email</dt>
+                        <dd>cmperro+gimmeapoll@gmail.com</dd>
+                        <dt>Real Job</dt>
+                        <dd>Programmer for DoD</dd>
+                        <dt>Interests</dt>
+                        <dd>Python, tasty beer, and good cup of coffee</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="span6">
+            <h2>The Project</h2>
+            <dl>
+                <dt>Goal</dt>
+                <dd>A polling app that doesn't require logging in and doesn't suck</dd>
+                <dt>Sauce?</dt>
+                <dd>Sure, find it <a href="https://github.com/sbadame/polling" target=”_blank”>Here</a></dd>
+                <dt>Implemented Using...</dt>
+                <dd>Python, Django, MySQL, Haystack, Solr, Bootstrap, LESS, VirtualEnvironment</dd>
+            </dl>
+        </div>
+    </div>
+</div>
 {% endblock %}
