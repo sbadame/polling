@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
 from polls.models import Poll,Choice,Vote
+from django.views.decorators.cache import cache_page
 import datetime
 import haystack
 import random
@@ -88,6 +89,7 @@ def get_random_poll():
             pass
 
 
+@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
     latest_poll_list = Poll.objects.all().order_by('-date_created')[:10]
     popular_poll_list = Poll.objects.order_by('-total_votes')[:10]
