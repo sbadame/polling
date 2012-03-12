@@ -178,8 +178,8 @@ LOGGING = {
 }
 
 
-if DEBUG:
 #Write our pid for the manager...
+if DEBUG:
     tempfile = ".managerprocs"
     import os
     persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
