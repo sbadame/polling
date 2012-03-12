@@ -1,3 +1,4 @@
+polls/static/bootstrap/less/*.css
 .managerprocs
 solr/example/solr/data/
 solr/example/work/
