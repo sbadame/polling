@@ -103,15 +103,11 @@ def vote(request, poll_id):
         return render_to_response('detail.html', {'poll':poll, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
-    if not poll.has_expired():
-        hash = request_hash(request)
-        try:
-            poll.vote_set.get(hash=hash)
-        except Vote.DoesNotExist:
-            poll.total_votes += 1
-            selected_choice.votes += 1
-            poll.vote_set.create(hash=hash)
-            selected_choice.save()
-            poll.save()
+    if not (poll.has_expired() or already_voted(request, poll)):
+        poll.total_votes += 1
+        selected_choice.votes += 1
+        poll.vote_set.create(hash=hash)
+        selected_choice.save()
+        poll.save()
 
     return HttpResponseRedirect(reverse('poll_view',args=(poll.id,)))
