@@ -4,8 +4,9 @@ South==0.7.3
 distribute==0.6.24
 django-appconf==0.5
 django-haystack==1.2.6
-django-pipeline==1.2b5
+django-pipeline==1.2c1
 django-staticfiles==1.2.1
 pylibmc==1.2.2
 pysolr==2.1.0-beta
+virtualenv==1.7.1.2
 wsgiref==0.1.2
