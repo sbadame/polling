@@ -18,11 +18,7 @@ def request_hash(request):
 
 def already_voted(request, poll):
     hash = request_hash(request)
-    try:
-        poll.vote_set.get(hash__exact=hash)
-    except Vote.DoesNotExist:
-        return False
-    return True
+    return poll.vote_set.filter(hash__exact=hash).exists()
 
 def create(request):
     try:
