@@ -105,6 +105,10 @@ class Public_Poll(Poll):
     
     public_hash = models.IntegerField(default=0)
 
+    @models.permalink
+    def get_vote_url(self):
+        return ('polls.views.vote_public', (), {'poll_id':self.id})
+
 class Private_Poll(Poll):
     @staticmethod
     def create(question, *choices, **kwargs):
@@ -135,6 +139,14 @@ class Private_Poll(Poll):
         return newpoll
     
     private_hash = models.CharField(max_length=200)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('polls.views.view_private', (), {'private_hash':self.private_hash})
+
+    @models.permalink
+    def get_vote_url(self):
+        return ('polls.views.vote_private', (), {'private_hash':self.private_hash})
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)

@@ -56,10 +56,13 @@ def create(request):
     else:
         if request.POST['pub_priv'] == 'Private':
             p = Private_Poll.create(question, *choices)
+            hasher = hashlib.md5()
+            hasher.update(question)
             time_hash = datetime.datetime.now()
-            p.private_hash = time_hash.year + time_hash.month + time_hash.day + time_hash.hour + time_hash.minute + time_hash.second + time_hash.microsecond
+            hasher.update(str(time_hash))
+            p.private_hash = hasher.hexdigest()
             p.save()
-            return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+            return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
         else:
             p = Public_Poll.create(question, *choices)
             #p = Poll(question=question, date_created=datetime.datetime.now())
@@ -69,7 +72,15 @@ def create(request):
             return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
 def view(request, poll_id):
-    poll = get_object_or_404(Poll, pk=poll_id)
+    poll = get_object_or_404(Public_Poll, pk=poll_id)
+    if poll.has_expired() or already_voted(request, poll):
+        template = "results.html"
+    else:
+        template = "detail.html"
+    return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
+
+def view_private(request, private_hash):
+    poll = get_object_or_404(Private_Poll, private_hash=private_hash)
     if poll.has_expired() or already_voted(request, poll):
         template = "results.html"
     else:
@@ -104,8 +115,17 @@ def index(request):
     return render_to_response(template, {'latest_poll_list': latest_poll_list,'popular_poll_list': popular_poll_list,
         'random_poll': random_poll,'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
 
-def vote(request, poll_id):
-    p = get_object_or_404(Poll, pk=poll_id)
+def vote_public(request, poll_id):
+    p = get_object_or_404(Public_Poll, pk=poll_id)
+    vote(request,p)
+    return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+
+def vote_private(request, private_hash):
+    p = get_object_or_404(Private_Poll, private_hash=private_hash)
+    vote(request,p)
+    return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
+
+def vote(request, p):
     try:
         selected_choice = p.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
@@ -122,5 +142,3 @@ def vote(request, poll_id):
             selected_choice.save()
             p.vote_set.create(hash=hash)
             p.save()
-
-    return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))

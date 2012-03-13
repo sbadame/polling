@@ -5,7 +5,7 @@
         <h1>{{ poll.question }} ?</h1>
         <br />
         {% if error_message %}<p><strong>{{ error_message }} </strong></p>{% endif %}
-        <form action="/{{ poll.id }}/vote/" method="post">
+        <form action="{{ poll.get_vote_url }}" method="post">
         {% csrf_token %}
 
         {% for choice in poll.choice_set.all %}
@@ -19,4 +19,5 @@
         </form>
     </div>
 </div>
+<h3> {{ poll.get_absolute_url }} </h3>
 {% endblock %}
