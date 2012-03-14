@@ -20,8 +20,14 @@ DATABASES = {
         'PASSWORD': 'polls',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
+    },
 }
+
+# From stackoverflow: http://stackoverflow.com/questions/6353124/running-django-tests-with-sqlite
+import sys
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
 
 CACHES = {
     'default': {
