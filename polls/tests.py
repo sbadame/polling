@@ -122,32 +122,51 @@ class Public_PollViewTests(TestCase, AnyPollViewTests):
         self.assertEquals(200, response.status_code)
         self.assertEquals(p, response.context['poll'])
 
-    def test_successful_public_vote(self):
-        self.do_successful_vote(Public_Poll)
-
-    def test_successful_private_vote(self):
-        self.do_successful_vote(Private_Poll)
-
-    def do_successful_vote(self, polltype):
-        p = polltype.create("New Poll", "Choice1", "Choice2")
+    def test_successful_vote(self):
+        p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
         choice =  p.choice_set.all()[0]
         c = Client()
         response = c.post(p.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
 
         #Need to reload poll from the db, the "cached" p.total_votes is different now.
         #Don't know of how else to do it...
-        p = polltype.objects.get(pk=p.id)
+        p = self.getPollModelClass().objects.get(pk=p.id)
         self.assertEquals(302, response.status_code)
         self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
         self.assertEquals(1, p.total_votes)
 
-class Private_PollViewTests(AnyPollViewTestCase):
+class Private_PollViewTests(TestCase, AnyPollViewTests):
 
     def getPollModelClass(self):
         return Private_Poll
 
-class Public_PollViewTests(AnyPollViewTestCase):
+    # This needs to be its own function since the post parameters between Public and Private polls
+    # are different
+    def test_successful_private_create(self):
+        c = Client()
+        question = 'My new question'
+        choice1 = "dog"
+        choice2 = "cat"
+        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv':
+        'Private' })
+
+        #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
+        self.assertEquals(302, response.status_code)
+
+
+class Public_PollViewTests(TestCase, AnyPollViewTests):
 
     def getPollModelClass(self):
         return Public_Poll
 
+    # This needs to be its own function since the post parameters between Public and Private polls
+    # are different
+    def test_successful_public_create(self):
+        c = Client()
+        question = 'My new question'
+        choice1 = "dog"
+        choice2 = "cat"
+        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv': '' })
+
+        #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
+        self.assertEquals(302, response.status_code)
