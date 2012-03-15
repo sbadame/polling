@@ -9,6 +9,7 @@ import datetime
 import haystack
 import random
 import hashlib
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 def request_hash(request):
     hasher = hashlib.md5()
@@ -131,6 +132,7 @@ def vote(request, p):
                 context_instance= RequestContext(request))
 
     if not (p.has_expired() or already_voted(request, p)):
+        hash = request_hash(request)
         p.total_votes += 1
         selected_choice.votes += 1
         p.vote_set.create(hash=hash)
