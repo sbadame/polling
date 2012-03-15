@@ -42,9 +42,43 @@ class PollTestCase(TestCase):
                 self.expired_poll.has_expired(),
                 "%s has not expired. length=%s" % (self.expired_poll, self.expiration_length))
 
-class PollViewTestCase(TestCase):
-    """ Time to test the views """
+class AnyPollViewTests(object):
+    '''Notice that this class doesn't subclass TestCase.
+    Here we store all tests that are relevent to both types of polls
+    Public and Private. Subclasses just need to return w/e class they
+    want to be tested with this suite of tests. See Private_PollViewTests
+    and Public_PollViewTests to see how they use this class.'''
+    #TODO: Add test cases for when things go horribly wrong
+    #TODO: Add test cases for cheating
 
+    def test_successful_view(self):
+        p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
+        c = Client()
+        url = p.get_absolute_url()
+        response = c.get(url, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        self.assertEquals(200, response.status_code)
+        self.assertEquals(p, response.context['poll'])
+
+    def test_successful_vote(self):
+        p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
+        choice =  p.choice_set.all()[0]
+        c = Client()
+        response = c.post(p.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+
+        #Need to reload poll from the db, the "cached" p.total_votes is different now.
+        #Don't know of how else to do it...
+        p = self.getPollModelClass().objects.get(pk=p.id)
+        self.assertEquals(302, response.status_code)
+        self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
+        self.assertEquals(1, p.total_votes)
+
+class Private_PollViewTests(TestCase, AnyPollViewTests):
+
+    def getPollModelClass(self):
+        return Private_Poll
+
+    # This needs to be its own function since the post parameters between Public and Private polls
+    # are different
     def test_successful_private_create(self):
         c = Client()
         question = 'My new question'
@@ -56,6 +90,14 @@ class PollViewTestCase(TestCase):
         #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
         self.assertEquals(302, response.status_code)
 
+
+class Public_PollViewTests(TestCase, AnyPollViewTests):
+
+    def getPollModelClass(self):
+        return Public_Poll
+
+    # This needs to be its own function since the post parameters between Public and Private polls
+    # are different
     def test_successful_public_create(self):
         c = Client()
         question = 'My new question'
@@ -65,37 +107,3 @@ class PollViewTestCase(TestCase):
 
         #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
         self.assertEquals(302, response.status_code)
-
-    def test_successful_public_view(self):
-        self.do_successful_view(Public_Poll)
-
-    def test_successful_private_view(self):
-        self.do_successful_view(Private_Poll)
-
-    def do_successful_view(self, polltype):
-        p = polltype.create("New Poll", "Choice1", "Choice2")
-        c = Client()
-        url = p.get_absolute_url()
-        response = c.get(url, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(p, response.context['poll'])
-
-    def test_successful_public_vote(self):
-        self.do_successful_vote(Public_Poll)
-
-    def test_successful_private_vote(self):
-        self.do_successful_vote(Private_Poll)
-
-    def do_successful_vote(self, polltype):
-        p = polltype.create("New Poll", "Choice1", "Choice2")
-        choice =  p.choice_set.all()[0]
-        c = Client()
-        response = c.post(p.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
-
-        #Need to reload poll from the db, the "cached" p.total_votes is different now.
-        #Don't know of how else to do it...
-        p = polltype.objects.get(pk=p.id)
-        self.assertEquals(302, response.status_code)
-        self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
-        self.assertEquals(1, p.total_votes)
-
