@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+import hashlib
 
 # The rundown on how to to deal with models
 # =========================================
@@ -27,34 +28,6 @@ class Poll(models.Model):
             'date_expire',
             default = datetime.datetime.now() + time_delta_to_expire)
     total_votes = models.IntegerField(default=0)
-
-    @staticmethod
-    def create(question, *choices, **kwargs):
-        """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
-        Time for some design patterns up in this bitch. Factory method: GO!!"""
-
-        if not question or not choices:
-            raise ValueError("Both question: %s and choices: %s must be defined" % (question, choices))
-
-        if len(choices) < 2:
-            raise ValueError("Poll can't have less than two choices: %s" % choices)
-
-        if "question" in kwargs:
-            raise ValueError("Can't define question twice arg: \"%s\", question=\"%s\"" % (question,
-                kwargs["question"]))
-
-        if "date_created" not in kwargs:
-            kwargs["date_created"] = datetime.datetime.now()
-
-        if "date_expire" not in kwargs:
-            kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
-
-        newpoll = Poll.objects.create(question=question, **kwargs)
-
-        for choice in choices:
-            newpoll.choice_set.create(choice=choice, votes=0)
-
-        return newpoll
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]
@@ -97,12 +70,12 @@ class Public_Poll(Poll):
             kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
 
         newpoll = Public_Poll.objects.create(question=question, **kwargs)
-        
+
         for choice in choices:
             newpoll.choice_set.create(choice=choice, votes=0)
 
         return newpoll
-    
+
     public_hash = models.IntegerField(default=0)
 
     @models.permalink
@@ -131,13 +104,20 @@ class Private_Poll(Poll):
         if "date_expire" not in kwargs:
             kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
 
+        if "private_hash" not in kwargs:
+            hasher = hashlib.md5()
+            hasher.update(question)
+            time_hash = datetime.datetime.now()
+            hasher.update(str(time_hash))
+            kwargs["private_hash"] = hasher.hexdigest()
+
         newpoll = Private_Poll.objects.create(question=question, **kwargs)
 
         for choice in choices:
             newpoll.choice_set.create(choice=choice, votes=0)
 
         return newpoll
-    
+
     private_hash = models.CharField(max_length=200)
 
     @models.permalink

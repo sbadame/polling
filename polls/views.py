@@ -54,12 +54,6 @@ def create(request):
     else:
         if request.POST['pub_priv'] == 'Private':
             p = Private_Poll.create(question, *choices)
-            hasher = hashlib.md5()
-            hasher.update(question)
-            time_hash = datetime.datetime.now()
-            hasher.update(str(time_hash))
-            p.private_hash = hasher.hexdigest()
-            p.save()
             return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
         else:
             p = Public_Poll.create(question, *choices)

@@ -1,7 +1,7 @@
 # Django settings for polls project.
 
-import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
+# import logging
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -188,14 +188,20 @@ LOGGING = {
 #Write our pid for the manager...
 if DEBUG:
     tempfile = ".managerprocs"
-    import os
-    persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
-    persisted["runserver"]["pid"] = os.getpid()
-    f = open(tempfile, "w")
-    f.write("%r" % persisted)
-    f.close()
+    try:
+        import os
+        persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
+        if "runserver" not in persisted:
+            persisted["runserver"] = {}
+        persisted["runserver"]["pid"] = os.getpid()
+        f = open(tempfile, "w")
+        f.write("%r" % persisted)
+        f.close()
+    except IOError:
+        print("Couldn't open %s to store the pid" % tempfile)
 
 try:
     from local_settings import *
 except ImportError:
+    print("No local_settings.py loaded.")
     pass

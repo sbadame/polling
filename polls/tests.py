@@ -8,24 +8,25 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.test.client import Client
 
-from polls.models import Poll
+from polls.models import Public_Poll
+from polls.models import Private_Poll
 import datetime
 
 class PollTestCase(TestCase):
     def setUp(self):
 
-        self.new_poll = Poll.create("New Poll", "Choice1", "Choice2", "Choice3")
+        self.new_poll = Public_Poll.create("New Poll", "Choice1", "Choice2", "Choice3")
 
         #An expired poll
-        self.expiration_length = Poll.time_delta_to_expire + datetime.timedelta(days=1)
-        self.expired_poll = Poll.create("Expired Poll", "Choice1", "Choice2", "Choice3",
+        self.expiration_length = Public_Poll.time_delta_to_expire + datetime.timedelta(days=1)
+        self.expired_poll = Public_Poll.create("Expired Poll", "Choice1", "Choice2", "Choice3",
                 date_created=datetime.datetime.now() - self.expiration_length)
 
     def test_create(self):
         question = "A Generic Name"
         choice1 = "A Choice"
         choice2 = "A Second Choice"
-        poll = Poll.create(question, choice1, choice2)
+        poll = Public_Poll.create(question, choice1, choice2)
 
         self.assertEqual(question, poll.question)
         #Next two methods should throw an exception if the choice doesn't exist.
@@ -44,33 +45,56 @@ class PollTestCase(TestCase):
 class PollViewTestCase(TestCase):
     """ Time to test the views """
 
-    def test_successful_create(self):
+    def test_successful_private_create(self):
         c = Client()
         question = 'My new question'
         choice1 = "dog"
         choice2 = "cat"
-        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2 })
+        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv':
+        'Private' })
 
         #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
         self.assertEquals(302, response.status_code)
 
-    def test_successful_view(self):
-        p = Poll.create("New Poll", "Choice1", "Choice2")
+    def test_successful_public_create(self):
         c = Client()
+        question = 'My new question'
+        choice1 = "dog"
+        choice2 = "cat"
+        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv': '' })
 
-        response = c.get("/"+str(p.id)+"/", HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
+        self.assertEquals(302, response.status_code)
+
+    def test_successful_public_view(self):
+        self.do_successful_view(Public_Poll)
+
+    def test_successful_private_view(self):
+        self.do_successful_view(Private_Poll)
+
+    def do_successful_view(self, polltype):
+        p = polltype.create("New Poll", "Choice1", "Choice2")
+        c = Client()
+        url = p.get_absolute_url()
+        response = c.get(url, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
         self.assertEquals(200, response.status_code)
         self.assertEquals(p, response.context['poll'])
 
-    def test_successful_vote(self):
-        p = Poll.create("New Poll", "Choice1", "Choice2")
+    def test_successful_public_vote(self):
+        self.do_successful_vote(Public_Poll)
+
+    def test_successful_private_vote(self):
+        self.do_successful_vote(Private_Poll)
+
+    def do_successful_vote(self, polltype):
+        p = polltype.create("New Poll", "Choice1", "Choice2")
         choice =  p.choice_set.all()[0]
         c = Client()
-        response = c.post("/%d/vote/" % p.id, {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        response = c.post(p.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
 
         #Need to reload poll from the db, the "cached" p.total_votes is different now.
         #Don't know of how else to do it...
-        p = Poll.objects.get(pk=p.id)
+        p = polltype.objects.get(pk=p.id)
         self.assertEquals(302, response.status_code)
         self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
         self.assertEquals(1, p.total_votes)
