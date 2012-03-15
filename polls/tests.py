@@ -62,21 +62,16 @@ class PollViewTestCase(TestCase):
         self.assertEquals(200, response.status_code)
         self.assertEquals(p, response.context['poll'])
 
+    def test_successful_vote(self):
+        p = Poll.create("New Poll", "Choice1", "Choice2")
+        choice =  p.choice_set.all()[0]
+        c = Client()
+        response = c.post("/%d/vote/" % p.id, {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #Need to reload poll from the db, the "cached" p.total_votes is different now.
+        #Don't know of how else to do it...
+        p = Poll.objects.get(pk=p.id)
+        self.assertEquals(302, response.status_code)
+        self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
+        self.assertEquals(1, p.total_votes)
 

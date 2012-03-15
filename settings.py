@@ -1,7 +1,7 @@
 # Django settings for polls project.
 
-#import logging
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -20,6 +20,19 @@ DATABASES = {
         'PASSWORD': 'polls',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    },
+}
+
+# From stackoverflow: http://stackoverflow.com/questions/6353124/running-django-tests-with-sqlite
+import sys
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
     }
 }
 
@@ -59,7 +72,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '.'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -80,9 +93,9 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'staticfiles.finders.FileSystemFinder',
+    'staticfiles.finders.AppDirectoriesFinder',
+    'staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -109,7 +122,6 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/sandro/Documents/personal/polling/templates",
 )
 
 INSTALLED_APPS = (
@@ -119,19 +131,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'staticfiles',
     'polls',
-    'haystack', #TODO Re-enable this
+    'haystack',
     'south', #For data migration
-    # Uncomment the next line to enable the admin:
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'pipeline', #To compress and compile files like less
 )
 
 HAYSTACK_SITECONF = 'polling.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
-
 
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -139,6 +148,16 @@ HAYSTACK_CONNECTIONS = {
         'URL': 'http://127.0.0.1:8983/solr'
     }
 
+}
+
+PIPELINE_CSS_COMPRESSOR = None
+PIPELINE_COMPILERS = ( 'pipeline.compilers.less.LessCompiler', )
+PIPELINE_LESS_BINARY = "/usr/bin/lessc"
+PIPELINE_CSS = {
+    'custombootstrap' : {
+        'source_filenames': ('polls/static/bootstrap/less/bootstrap.less',),
+        'output_filename': 'polls/static/pipelined/bootstrap.css',
+    }
 }
 
 # A sample logging configuration. The only tangible logging
@@ -163,6 +182,17 @@ LOGGING = {
         },
     }
 }
+
+
+#Write our pid for the manager...
+if DEBUG:
+    tempfile = ".managerprocs"
+    import os
+    persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
+    persisted["runserver"]["pid"] = os.getpid()
+    f = open(tempfile, "w")
+    f.write("%r" % persisted)
+    f.close()
 
 try:
     from local_settings import *

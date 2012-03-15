@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
 from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote
+from django.views.decorators.cache import cache_page
 import datetime
 import haystack
 import random
@@ -17,11 +18,7 @@ def request_hash(request):
 
 def already_voted(request, poll):
     hash = request_hash(request)
-    try:
-        poll.vote_set.get(hash__exact=hash)
-    except Vote.DoesNotExist:
-        return False
-    return True
+    return poll.vote_set.filter(hash__exact=hash).exists()
 
 def create(request):
     try:
@@ -106,6 +103,7 @@ def get_random_poll():
             pass
 
 
+@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
     latest_poll_list = Public_Poll.objects.all().order_by('-date_created')[:10]
     popular_poll_list = Public_Poll.objects.order_by('-total_votes')[:10]
@@ -132,13 +130,9 @@ def vote(request, p):
         return render_to_response('detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
-    if not p.has_expired():
-        hash = request_hash(request)
-        try:
-            vote = p.vote_set.get(hash=hash)
-        except Vote.DoesNotExist:
-            selected_choice.votes += 1
-            p.total_votes += 1
-            selected_choice.save()
-            p.vote_set.create(hash=hash)
-            p.save()
+    if not (p.has_expired() or already_voted(request, p)):
+        p.total_votes += 1
+        selected_choice.votes += 1
+        p.vote_set.create(hash=hash)
+        selected_choice.save()
+        p.save()
