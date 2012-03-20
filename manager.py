@@ -1,21 +1,12 @@
 #!/usr/bin/env python2.7
 
-# Usage:
-#  update
-#    pulls changes, updates pip, applies the db migrations
-#  start [runserver|solr|memcached|all]
-#    starts up each respective process, all starts them all
-#  stop [runserver|solr|memcached]
-#    kills the respective process (only guarenteed to work if it was started with this script. Might work otherwise, but no guarentees)
-#  stat [runserver|solr|memcached|all]
-#    prints the pid of each process. Prints None if that process isn't running. Passing no args to stats is the same as "all"
-#
-
 from __future__ import print_function
 import os
 import subprocess
 import sys
 import local_settings
+
+argument_prefix = "cmd_"
 
 tempfile = ".managerprocs"
 persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
@@ -37,28 +28,56 @@ def runserver():
     else:
         updatepid("runserver", pid)
 
-def start_all():
-    startApp(memcached)
-    startApp(solr)
-    startApp(runserver)
-
-def startApp(command):
-    name = command.__name__
-    if app_pid(command):
-        print("%s is already running with pid: %d" % (name, app_pid(command)))
+def cmd_stat(args):
+    '''
+    [all|<any process>]
+        Prints the currently known pid of every running process or None
+        if the process is not running
+    '''
+    if len(args) < 2 or args[1] == "all":
+        for cmd in [runserver, solr, memcached]:
+            print(cmd.__name__ + ": " + str(app_pid(cmd)))
     else:
-        command()
+        command = globals()[args[1]]
+        print(command.__name__ + ": " + str(app_pid(command)))
 
-def stopApp(command):
-    pid = app_pid(command)
-    if pid:
-        run("kill %d" % pid)
-        updatepid(command.__name__, None)
+def cmd_start(args):
+    '''
+    [all|<any process>]
+        Starts any of the available processes.
+        Using the "all" option starts all of the processes required to get
+        polling up and running in order checking for failed starts.
+    '''
+    if "all" in args:
+        if len(args) == 1:
+            cmd_start(["memcached", "solr", "runserver"])
+        else:
+            print("Check your arguments! Can't start everything AND a process!")
     else:
-        error("Don't have a pid for %s" % command.__name__)
+        for arg in args:
+            if app_pid(arg):
+                print("%s is already running with pid: %d" % (arg, app_pid(arg)))
+            else:
+                globals()[arg]()
+
+def cmd_stop(commands):
+    '''
+    [all|<any process>]
+        Kills the processes passed in or all of the known running processes.
+    '''
+    if commands == ["all"]:
+        cmd_stop(["memcached", "solr", "runserver"])
+    else:
+        for command in commands:
+            pid = app_pid(command)
+            if pid:
+                run("kill %d" % pid)
+                updatepid(command, None)
+            else:
+                error("Don't have a pid for %s" % command)
 
 def app_pid(command):
-    name = command.__name__
+    name = command
     if name in persisted:
         if "pid" in persisted[name]:
             # A long-winded way of doing: ps -ef | grep <pid> | grep -v grep
@@ -76,7 +95,18 @@ def app_pid(command):
                 updatepid(name, None)
     return None
 
-def update():
+def cmd_update(args):
+    '''
+    <ignores any arguments>
+        Runs the following operations stopping if an operation fails. Does
+        not undo steps that completed succesfully.
+        1. update source code
+          git pull
+        2. update pip requirements
+          pip install -r requirements.txt
+        3. perform any schema/daaa migrations
+          python manage.py migrate polls
+    '''
     out,err = run('git status')
     if not out.endswith("(working directory clean)\n"):
         error("Cannot update with dirty working directory. Commit or revert changes")
@@ -137,7 +167,6 @@ def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs)
             err_thread.daemon = True
             err_thread.start()
 
-
             def keeploop():
                 if waitFor:
                     return time.clock() - start_time <= 5
@@ -175,6 +204,10 @@ def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs)
         return None
 
 def updatepid(name, pid):
+    '''
+    Writes the given pid for the given process name to the .managerprocs 
+    file
+    '''
     old = {}
     if name in persisted:
         old = persisted[name]
@@ -187,35 +220,41 @@ def updatepid(name, pid):
     f.write("%r" % persisted)
     f.close()
 
+def unknownArgs(args):
+    print("Couldn't understand the arguments: \"%s\"" % " ".join(args))
+    cmd_printHelp()
+    exit(1)
+
+#Commands are functions that start with "argument_prefx"
+#They can be directly called from the commandline by using their name
+#without the prefix so: ./manager.py foo apple banana
+#Assume that cmd_foo(args) exists and it will be called like so:
+#cmd_foo(["apple","banana"])
+#
+#The usage string for help for that command is the function's
+#docstring. So just document your code and all is good :)
+available_commands = dict(
+        (k[len(argument_prefix):],v)
+        for (k,v) in globals().iteritems()
+        if k.startswith(argument_prefix))
+
+def format_command(name, function):
+    doc = function.__doc__ if function.__doc__ else ""
+    return  "%s %s\n" % (name, doc.strip())
+
+def cmd_printHelp():
+    commands = [ format_command(n, c)  for (n,c) in  available_commands.items() ]
+    usage = "\n".join(commands)
+    print(usage)
+
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args[0] not in "stat,start,stop,update,restart".split(","):
-        raise ValueError("Don't understand command: %s" % args[0])
 
-
-    if args[0] != "update" and len(args) > 1 and args[1] not in "runserver,mysql,memcached,solr,all".split(","):
-        raise ValueError("Don't understand program: %s" % args[1])
-
-    if args[0] == "update":
-        update()
-        exit()
-
-    if args[0] == "start" and args[1] == "all":
-        start_all()
-        exit()
-
-    if args[0] == "stat":
-        if len(args) < 2 or args[1] == "all":
-            for cmd in [runserver, solr, memcached]:
-                print(cmd.__name__ + ": " + str(app_pid(cmd)))
-        else:
-            command = globals()[args[1]]
-            print(command.__name__ + ": " + str(app_pid(command)))
-        exit()
-
-    command = globals()[args[1]]
-    if args[0] == "stop":
-        stopApp(command)
+    if not args or args[0] not in available_commands.keys():
+        unknownArgs(args)
     else:
-        command()
+        available_commands[args[0]](args[1:])
 
+    if args[0] == "help" or args[0] == "-h":
+        cmd_printHelp()
+        exit()
