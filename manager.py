@@ -1,12 +1,11 @@
 #!/usr/bin/env python2.7
 
-
-# Usage: 
+# Usage:
 #  update
 #    pulls changes, updates pip, applies the db migrations
 #  start [runserver|solr|memcached|all]
 #    starts up each respective process, all starts them all
-#  kill [runserver|solr|memcached]
+#  stop [runserver|solr|memcached]
 #    kills the respective process (only guarenteed to work if it was started with this script. Might work otherwise, but no guarentees)
 #  stat [runserver|solr|memcached|all]
 #    prints the pid of each process. Prints None if that process isn't running. Passing no args to stats is the same as "all"
@@ -50,7 +49,7 @@ def startApp(command):
     else:
         command()
 
-def killApp(command):
+def stopApp(command):
     pid = app_pid(command)
     if pid:
         run("kill %d" % pid)
@@ -190,7 +189,7 @@ def updatepid(name, pid):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args[0] not in "stat,start,kill,update,restart".split(","):
+    if args[0] not in "stat,start,stop,update,restart".split(","):
         raise ValueError("Don't understand command: %s" % args[0])
 
 
@@ -215,8 +214,8 @@ if __name__ == "__main__":
         exit()
 
     command = globals()[args[1]]
-    if args[0] == "kill":
-        killApp(command)
+    if args[0] == "stop":
+        stopApp(command)
     else:
         command()
 
