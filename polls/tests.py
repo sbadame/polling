@@ -72,6 +72,19 @@ class AnyPollViewTests(object):
         self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
         self.assertEquals(1, p.total_votes)
 
+    def test_empty_post_vote(self):
+        p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
+        c = Client()
+        response = c.post(p.get_vote_url(), {}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+
+        p = self.getPollModelClass().objects.get(pk=p.id)
+        self.assertEquals(200, response.status_code)
+        self.assertEquals(0, p.total_votes)
+        for choice in p.choice_set.all():
+            self.assertEquals(0, choice.votes)
+
+
+
 class Private_PollViewTests(TestCase, AnyPollViewTests):
 
     def getPollModelClass(self):

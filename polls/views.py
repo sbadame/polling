@@ -110,12 +110,16 @@ def index(request):
 
 def vote_public(request, poll_id):
     p = get_object_or_404(Public_Poll, pk=poll_id)
-    vote(request,p)
+    result = vote(request,p)
+    if result:
+        return result
     return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
 def vote_private(request, private_hash):
     p = get_object_or_404(Private_Poll, private_hash=private_hash)
-    vote(request,p)
+    result = vote(request,p)
+    if result:
+        return result
     return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
 
 def vote(request, p):
