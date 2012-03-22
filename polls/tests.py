@@ -98,11 +98,25 @@ class Private_PollViewTests(TestCase, AnyPollViewTests):
         question = 'My new question'
         choice1 = "dog"
         choice2 = "cat"
-        response = self.client.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv':
-        'Private' })
+        response = self.client.post('/create',
+                {'question': question,
+                 'choice1': choice1,
+                 'choice2' : choice2,
+                 'pub_priv': 'Private' },
+                follow=True,
+                HTTP_USER_AGENT="django-test",
+                REMOTE_ADDR="0.0.0.0")
 
         #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
-        self.assertEquals(302, response.status_code)
+        [(redirect_url,http_status_code)] = response.redirect_chain
+        self.assertEquals(302, http_status_code) #Check that we direct from the form submission
+        self.assertEquals(200, response.status_code)
+        newpoll = response.context['poll']
+        self.assertTrue(redirect_url.endswith(newpoll.get_absolute_url()))
+        self.assertEquals(question, newpoll.question)
+        newpoll.choice_set.get(choice=choice1)
+        newpoll.choice_set.get(choice=choice2)
+        self.assertEqual(2, newpoll.choice_set.count())
 
 
 class Public_PollViewTests(TestCase, AnyPollViewTests):
