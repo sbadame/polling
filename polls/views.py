@@ -22,15 +22,14 @@ def already_voted(request, poll):
     return poll.vote_set.filter(hash__exact=hash).exists()
 
 def create(request):
-    try:
-        question = request.POST['question'].strip()
-        if not question:
-            raise KeyError("No question supplied")
-    except KeyError:
+    #Test whether we actually got a question
+    if 'question' not in request.POST or not request.POST['question'].strip():
         return render_to_response(\
             'index.html',\
             {'error_message':"You did not supply a question"},\
             context_instance = RequestContext(request))
+
+    question = request.POST['question'].strip()
 
     choices = []
     index = 1
@@ -57,10 +56,6 @@ def create(request):
             return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
         else:
             p = Public_Poll.create(question, *choices)
-            #p = Poll(question=question, date_created=datetime.datetime.now())
-            #p.save()
-            #for choice in choices:
-                #p.choice_set.create(choice=choice, votes=0)
             return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
 
 def view(request, poll_id):
@@ -136,3 +131,5 @@ def vote(request, p):
         p.vote_set.create(hash=hash)
         selected_choice.save()
         p.save()
+
+    return None
