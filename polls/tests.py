@@ -51,13 +51,15 @@ class AnyPollViewTests(object):
     #TODO: Add test cases for when things go horribly wrong
     #TODO: Add test cases for cheating
 
+    def setUp(self):
+        self.poll = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
+        self.client = Client()
+
     def test_successful_view(self):
-        p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
-        c = Client()
-        url = p.get_absolute_url()
-        response = c.get(url, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        url = self.poll.get_absolute_url()
+        response = self.client.get(url, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
         self.assertEquals(200, response.status_code)
-        self.assertEquals(p, response.context['poll'])
+        self.assertEquals(self.poll, response.context['poll'])
 
     def test_successful_vote(self):
         p = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
@@ -82,8 +84,6 @@ class AnyPollViewTests(object):
         self.assertEquals(0, p.total_votes)
         for choice in p.choice_set.all():
             self.assertEquals(0, choice.votes)
-
-
 
 class Private_PollViewTests(TestCase, AnyPollViewTests):
 
