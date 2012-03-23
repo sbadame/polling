@@ -75,12 +75,14 @@ def view_private(request, private_hash):
     return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
 
 def get_random_poll():
-    #In a perfect world, just picking a number from 0 -  Poll.objects.count() would work. Sadly
-    #polls get deleted. (Like poll 11 on my computer doesn't exist...)
-    #OK so we need a random, poll. Django gives us something for that: *.order_by('?'). Too bad
-    #its performance is utter garbage on mysql.
-    #So lets take the perro approach but wrap it a while loop to make sure that our id actually exists.
-    #TODO: make this handle the case of a sparse database better. (Or maybe it should encourage dense DBs)
+    """
+    In a perfect world, just picking a number from 0 -  Poll.objects.count() would work. Sadly
+    polls get deleted. (Like poll 11 on my computer doesn't exist...)
+    OK so we need a random, poll. Django gives us something for that: *.order_by('?'). Too bad
+    its performance is utter garbage on mysql.
+    So lets take the perro approach but wrap it a while loop to make sure that our id actually exists.
+    TODO: make this handle the case of a sparse database better. (Or maybe it should encourage dense DBs)
+    """
 
     poll_count = Poll.objects.count()
     while True:
@@ -104,32 +106,32 @@ def index(request):
         'random_poll': random_poll,'danger_poll_list': danger_poll_list}, context_instance=RequestContext(request))
 
 def vote_public(request, poll_id):
-    p = get_object_or_404(Public_Poll, pk=poll_id)
-    result = vote(request,p)
+    poll = get_object_or_404(Public_Poll, pk=poll_id)
+    result = vote(request,poll)
     if result:
         return result
-    return HttpResponseRedirect(reverse('poll_view',args=(p.id,)))
+    return HttpResponseRedirect(reverse('poll_view',args=(poll.id,)))
 
 def vote_private(request, private_hash):
-    p = get_object_or_404(Private_Poll, private_hash=private_hash)
-    result = vote(request,p)
+    poll = get_object_or_404(Private_Poll, private_hash=private_hash)
+    result = vote(request,poll)
     if result:
         return result
-    return HttpResponseRedirect(reverse('private_view',args=(p.private_hash,)))
+    return HttpResponseRedirect(reverse('private_view',args=(poll.private_hash,)))
 
-def vote(request, p):
+def vote(request, poll):
     try:
-        selected_choice = p.choice_set.get(pk=request.POST['choice'])
+        selected_choice = poll.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
-        return render_to_response('detail.html', {'poll':p, 'error_message':"You didn't select a choice."},
+        return render_to_response('detail.html', {'poll':poll, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))
 
-    if not (p.has_expired() or already_voted(request, p)):
+    if not (poll.has_expired() or already_voted(request, poll)):
         hash = request_hash(request)
-        p.total_votes += 1
+        poll.total_votes += 1
         selected_choice.votes += 1
-        p.vote_set.create(hash=hash)
+        poll.vote_set.create(hash=hash)
         selected_choice.save()
-        p.save()
+        poll.save()
 
     return None

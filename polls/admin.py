@@ -1,4 +1,4 @@
-from polls.models import Poll,Choice,Vote
+from polls.models import Public_Poll,Private_Poll,Choice,Vote
 from django.contrib import admin
 
 class ChoiceInline(admin.TabularInline):
@@ -17,8 +17,11 @@ class PollAdmin(admin.ModelAdmin):
         ('Date Expire Info', {'fields': ['date_expire']}),
     ]
     inlines = [ChoiceInline,VoteInline]
-    list_display = ('question', 'total_votes', 'date_created', 'date_expire')
+    list_display = ('question', 'get_absolute_url', 'get_vote_url', 'total_votes', 'date_created', 'date_expire')
     list_filter = ['date_created']
     search_fields = ['question']
 
-admin.site.register(Poll, PollAdmin)
+
+
+admin.site.register(Public_Poll, PollAdmin)
+admin.site.register(Private_Poll, PollAdmin)

@@ -10,14 +10,15 @@ contact_view = TemplateView.as_view(template_name='contact.html')
 #search = TemplateView.as_view(template_name='search.html')
 
 urlpatterns = patterns('',
-    url(r'^private/(?P<private_hash>[0-9a-f]+)/$', 'polls.views.view_private', name = 'private_view'),
     url(r'^$','polls.views.index', name = 'index_view'),
     url(r'^(?P<poll_id>\d+)/$', 'polls.views.view', name = 'poll_view'),
     url(r'^create$', 'polls.views.create'),
     url(r'^about$', about_view),
     url(r'^contact$', contact_view),
     url(r'^(?P<poll_id>\d+)/vote/$', 'polls.views.vote_public'),
-    url(r'^private(?P<private_hash>[0-9a-f]+)/vote/$', 'polls.views.vote_private'),
+    url(r'^private/(?P<private_hash>[a-zA-Z0-9]+)/$', 'polls.views.view_private', name = 'private_view'),
+    url(r'^private/(?P<private_hash>[a-zA-Z0-9]+)/vote/$', 'polls.views.vote_private'),
+
     # Search page(s)
     url(r'^search/',
         haystack.views.search_view_factory(

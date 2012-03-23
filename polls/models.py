@@ -83,6 +83,17 @@ class Public_Poll(Poll):
         return ('polls.views.vote_public', (), {'poll_id':self.id})
 
 class Private_Poll(Poll):
+
+    private_hash = models.CharField(max_length=200)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('polls.views.view_private', (), {'private_hash':self.private_hash})
+
+    @models.permalink
+    def get_vote_url(self):
+        return ('polls.views.vote_private', (), {'private_hash':self.private_hash})
+
     @staticmethod
     def create(question, *choices, **kwargs):
         """ Such a pain, I want the expiration time to be a function of the creation time. But nooooooooooooo.
@@ -109,7 +120,8 @@ class Private_Poll(Poll):
             hasher.update(question)
             time_hash = datetime.datetime.now()
             hasher.update(str(time_hash))
-            kwargs["private_hash"] = hasher.hexdigest()
+            base16 = hasher.hexdigest()
+            kwargs["private_hash"] = Private_Poll.convertBase16ToBase62(base16)
 
         newpoll = Private_Poll.objects.create(question=question, **kwargs)
 
@@ -118,15 +130,33 @@ class Private_Poll(Poll):
 
         return newpoll
 
-    private_hash = models.CharField(max_length=200)
+    @staticmethod
+    def convertBase16ToBase62(base16str):
+        """
+        Maybe Perro math can clean this up.
+        Convert to base 10, convert to base 62
+        Mostly snagged from:
+        http://code.activestate.com/recipes/111286-numeric-base-converter-that-accepts-arbitrary-digi/
+        """
+        import string
+        base62 = string.digits + string.ascii_lowercase + string.ascii_uppercase
+        base16 = string.digits + "abcdef"
+        base16str = base16str.lower()
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('polls.views.view_private', (), {'private_hash':self.private_hash})
+        #Convert to base10
+        base10num = 0
+        for digit in base16str:
+            base10num = base10num*16 + base16.index(digit)
 
-    @models.permalink
-    def get_vote_url(self):
-        return ('polls.views.vote_private', (), {'private_hash':self.private_hash})
+        #Convert to base62
+        result = ""
+        while base10num > 0:
+            digit = base10num % 62
+            result = base62[digit] + result
+            base10num /= 62
+
+        return result if result else "0"
+
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)

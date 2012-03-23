@@ -42,6 +42,17 @@ class PollTestCase(TestCase):
                 self.expired_poll.has_expired(),
                 "%s has not expired. length=%s" % (self.expired_poll, self.expiration_length))
 
+class Private_PollTestCase(TestCase):
+
+    def test_convertBase16ToBase62(self):
+        self.assertEquals("0", Private_Poll.convertBase16ToBase62("0"))
+        self.assertEquals("1", Private_Poll.convertBase16ToBase62("1"))
+        self.assertEquals("a", Private_Poll.convertBase16ToBase62("a"))
+        self.assertEquals("f", Private_Poll.convertBase16ToBase62("f"))
+        self.assertEquals("0", Private_Poll.convertBase16ToBase62("00"))
+        self.assertEquals("Trt", Private_Poll.convertBase16ToBase62("34083"))
+        self.assertEquals("2uSvahSdJhCwyQpmXhxYQq", Private_Poll.convertBase16ToBase62("5213fb6d88a1d6e9cb7bc0b88d4b5a4a"))
+
 class AnyPollViewTests(object):
     '''Notice that this class doesn't subclass TestCase.
     Here we store all tests that are relevent to both types of polls
