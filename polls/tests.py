@@ -12,7 +12,7 @@ from polls.models import Public_Poll
 from polls.models import Private_Poll
 import datetime
 
-class PollTestCase(TestCase):
+class PollModelTestCase(TestCase):
 
     def setUp(self):
         self.new_poll = Public_Poll.create("New Poll", "Choice1", "Choice2", "Choice3")
@@ -53,7 +53,7 @@ class Private_PollTestCase(TestCase):
         self.assertEquals("Trt", Private_Poll.convertBase16ToBase62("34083"))
         self.assertEquals("2uSvahSdJhCwyQpmXhxYQq", Private_Poll.convertBase16ToBase62("5213fb6d88a1d6e9cb7bc0b88d4b5a4a"))
 
-class AnyPollViewTests(object):
+class PollViewTest(object):
     '''Notice that this class doesn't subclass TestCase.
     Here we store all tests that are relevent to both types of polls
     Public and Private. Subclasses just need to return w/e class they
@@ -70,8 +70,7 @@ class AnyPollViewTests(object):
 
     def test_successful_vote(self):
         choice =  self.poll.choice_set.all()[0]
-        c = Client()
-        response = c.post(self.poll.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        response = self.client.post(self.poll.get_vote_url(), {"choice":choice.id}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
 
         #Need to reload poll from the db, the "cached" p.total_votes is different now.
         #Don't know of how else to do it...
@@ -81,7 +80,8 @@ class AnyPollViewTests(object):
         self.assertEquals(1, p.total_votes)
 
     def test_empty_post_vote(self):
-        response = self.client.post(self.poll.get_vote_url(), {}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
+        vote_url = self.poll.get_vote_url()
+        response = self.client.post(vote_url, {}, HTTP_USER_AGENT="django-test", REMOTE_ADDR="0.0.0.0")
 
         self.poll = self.getPollModelClass().objects.get(pk=self.poll.id)
         self.assertEquals(200, response.status_code)
@@ -94,7 +94,7 @@ class AnyPollViewTests(object):
                 {'question':"  ", 'Choice1':'sup', 'Choice2':'dog', 'pub_priv':''})
         self.assertEquals(200, response.status_code)
 
-class Private_PollViewTests(TestCase, AnyPollViewTests):
+class Private_PollViewTests(TestCase, PollViewTest):
 
     def setUp(self):
         self.poll = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
@@ -129,8 +129,7 @@ class Private_PollViewTests(TestCase, AnyPollViewTests):
         newpoll.choice_set.get(choice=choice2)
         self.assertEqual(2, newpoll.choice_set.count())
 
-
-class Public_PollViewTests(TestCase, AnyPollViewTests):
+class Public_PollViewTests(TestCase, PollViewTest):
 
     def setUp(self):
         self.poll = self.getPollModelClass().create("New Poll", "Choice1", "Choice2")
@@ -176,39 +175,3 @@ class Public_PollViewTests(TestCase, AnyPollViewTests):
         self.assertEquals(302, response.status_code)
         self.assertEquals(1, p.choice_set.get(pk=choice.id).votes)
         self.assertEquals(1, p.total_votes)
-
-class Private_PollViewTests(TestCase, AnyPollViewTests):
-
-    def getPollModelClass(self):
-        return Private_Poll
-
-    # This needs to be its own function since the post parameters between Public and Private polls
-    # are different
-    def test_successful_private_create(self):
-        c = Client()
-        question = 'My new question'
-        choice1 = "dog"
-        choice2 = "cat"
-        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv':
-        'Private' })
-
-        #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
-        self.assertEquals(302, response.status_code)
-
-
-class Public_PollViewTests(TestCase, AnyPollViewTests):
-
-    def getPollModelClass(self):
-        return Public_Poll
-
-    # This needs to be its own function since the post parameters between Public and Private polls
-    # are different
-    def test_successful_public_create(self):
-        c = Client()
-        question = 'My new question'
-        choice1 = "dog"
-        choice2 = "cat"
-        response = c.post('/create', {'question': question, 'choice1': choice1, 'choice2' : choice2, 'pub_priv': '' })
-
-        #Since this is a form submission, redirect is good practice. So 302 not 200 is the correct response
-        self.assertEquals(302, response.status_code)
