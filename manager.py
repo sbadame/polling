@@ -24,7 +24,8 @@ def runserver():
     # Really python? This is the only way to launch a non-child proc?
     pid = os.fork()
     if pid == 0:
-        os.execvp("python", ["", "manage.py", "runserver", "0.0.0.0:2869"])
+        address = "0.0.0.0:%d" % setting("PORT", 2869)
+        os.execvp("python", ["", "manage.py", "runserver", address])
     else:
         updatepid("runserver", pid)
 
