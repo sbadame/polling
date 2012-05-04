@@ -79,6 +79,8 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
     barWidth = Math.min(s.maxBarWidth, (s.width - s.barPadding*(data.length - 1)) / data.length);
     largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
 
+    //Create clickable groups for every bar
+
     //Get the yaxis that fits our graph best
     maxY = s.yAxis[0];
     i = 0;
@@ -108,6 +110,14 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
          barLabels[i] = barLabel;
     }
 
+    var groups = new Array();
+    //Click events
+    for (i = 0; i < data.length; i++) {
+        var group = paper.set();
+        group.push(barLabels[i]);
+        groups[i] = group;
+    }
+
     //Raphael seems to be giving a height for the text that is slightly shorter than the actual height. This causes
     //things like y's and g's to get cut off. My solution? Add a magical '4'. Why 4? Trial and error says that it works.
     labelYPos = s.height - (4+(tallestLabel/2));
@@ -129,6 +139,7 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
     rightSideLine = "M {0} 0 l 0 {1}".format(s.width, startBarHeight);
     paper.path(rightSideLine);
 
+    //Draw the ugly grid that we see
     maxTick = -1;
     for(tick = 0; tick <= largestValue; tick++) {
         for(tickLevel = 0; tickLevel < s.tickCount; tickLevel++) {
@@ -165,15 +176,8 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
         bar.attr(s.barAttr).attr({gradient: "270-"+s.colors[index]+"-"+s.colors2[index]});
         var finalPos = {y: barTop, height: barHeight};
         bar.animate(finalPos, animationTime, '<>');
+        groups[index].push(bar);
 
-        //I can't beleive that the only way to get a variable by value
-        //is to pass it through a function.
-        (function(localIndex){
-            bar.node.onclick = function(e){
-                var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
-                console.log($.post(voteurl, args));
-            };
-        })(index);
 
         //Bar value
         var text = paper.text(x + barWidth/2, 0, choiceValue); //Don't worry we'll set y soon enough...
@@ -182,10 +186,22 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
         text.attr({opacity: 0.0}).attr(s.fontAttr);
         var fadeIn = Raphael.animation({opacity:1.0}, animationTime*0.5);
         text.animate(fadeIn.delay(animationTime));
+        groups[index].push(text);
+
+        //I can't beleive that the only way to get a variable by value
+        //is to pass it through a function.
+        (function(group, localIndex){
+            group.click(function(e){
+                var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
+                $.post(voteurl, args);
+            });
+        })(groups[index], index);
 
         //Keep moving x along to the next bar
         x += barWidth + s.barPadding;
     }
+
+
 
     //Moments like this I just love jquery... get all of the hyperlinks (generated because by the title elements in
     //raphael) and apply some css to them. I could do this in a style sheet... but not until we have a main *.css file
