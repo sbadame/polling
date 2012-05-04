@@ -80,18 +80,20 @@ def get_random_poll():
     TODO: make this handle the case of a sparse database better. (Or maybe it should encourage dense DBs)
     """
 
+    #TODO: Super crazy weird bug. using Public_Poll.objects.count()
+    #Makes the server unresponsive... fun eh?
     poll_count = Poll.objects.count()
     while True:
         rand_poll_id = random.randint(1,poll_count-1)
         try:
-            random_poll = Poll.objects.get(id=rand_poll_id)
+            random_poll = Public_Poll.objects.get(id=rand_poll_id)
             return random_poll
         except Poll.DoesNotExist:
             #Darn it! Got a row that doesn't exist... try again...
             pass
 
 
-@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
+#@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
     now = datetime.datetime.now()
     latest_poll_list = Public_Poll.objects.exclude(date_expire__lt=now).order_by('-date_created')[:10]
