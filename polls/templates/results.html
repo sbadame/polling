@@ -41,9 +41,12 @@
     <script type="text/javascript">
         $(document).ready(function(){
             var data = [{% spaceless %}
-                {% for choice, votes in poll.results %}['{{choice|escapejs}}', {{votes}}]{% if not forloop.last %},{% endif %}{% endfor %}];
+            {% for choice, votes in poll.results %}['{{choice|escapejs}}', {{votes}}]{% if not forloop.last %},{% endif %}{% endfor %}];
             {% endspaceless %}
-            graph($('#canvas_container').get(0), data, {});
+            var choiceIds = [{% spaceless %}
+            {% for choice in poll.choice_set.all %} {{ choice.id }}{% if not forloop.last %},{% endif %}{% endfor %}];
+            {% endspaceless %}
+            graph($('#canvas_container').get(0), data, "{{ poll.get_vote_url }}", choiceIds, "{{ csrf_token }}", {});
         });
     </script>
 {% endblock %}

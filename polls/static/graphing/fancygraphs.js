@@ -44,10 +44,11 @@ String.prototype.format = function() {
  *      ex) an example value could be: [['Sandro', 100], ['Chris', 200]]
  * overrides: A list of settings that you can override
  */
-function graph(element, data, overrides) {
+function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
     if (overrides == undefined) {
         overrides = [];
     }
+
     s = {
         width: 500, //width of the graph
         height: 300, //height of the graph
@@ -165,6 +166,15 @@ function graph(element, data, overrides) {
         var finalPos = {y: barTop, height: barHeight};
         bar.animate(finalPos, animationTime, '<>');
 
+        //I can't beleive that the only way to get a variable by value
+        //is to pass it through a function.
+        (function(localIndex){
+            bar.node.onclick = function(e){
+                var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
+                console.log($.post(voteurl, args));
+            };
+        })(index);
+
         //Bar value
         var text = paper.text(x + barWidth/2, 0, choiceValue); //Don't worry we'll set y soon enough...
         //Stupid vertical middle centering text... shift up the text by one half it's size again...
@@ -176,6 +186,7 @@ function graph(element, data, overrides) {
         //Keep moving x along to the next bar
         x += barWidth + s.barPadding;
     }
+
     //Moments like this I just love jquery... get all of the hyperlinks (generated because by the title elements in
     //raphael) and apply some css to them. I could do this in a style sheet... but not until we have a main *.css file
     //with all of our crap. Not going to add in a new sheet just for 2 properties.
