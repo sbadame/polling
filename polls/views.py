@@ -60,11 +60,7 @@ def create(request):
 
 def view(request, poll_id):
     poll = get_object_or_404(Public_Poll, pk=poll_id)
-    if poll.has_expired() or already_voted(request, poll):
-        template = "results.html"
-    else:
-        template = "detail.html"
-    return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
+    return render_to_response("results.html", {'poll' : poll}, context_instance=RequestContext(request))
 
 def view_private(request, private_hash):
     poll = get_object_or_404(Private_Poll, private_hash=private_hash)
