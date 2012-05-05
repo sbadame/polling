@@ -254,7 +254,10 @@ if __name__ == "__main__":
     if not args or args[0] not in available_commands.keys():
         unknownArgs(args)
     else:
-        available_commands[args[0]](args[1:])
+        try:
+            available_commands[args[0]](args[1:])
+        except KeyError:
+            unknownArgs(args)
 
     if args[0] == "help" or args[0] == "-h":
         cmd_printHelp()
