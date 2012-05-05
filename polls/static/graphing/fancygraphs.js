@@ -78,7 +78,7 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
 
     paper = new Raphael(element, s.width, s.height);
     barWidth = Math.min(s.maxBarWidth, (s.width - s.barPadding*(data.length - 1)) / data.length);
-    largestValue = Math.max.apply(Math, data.map(function(e){return e[1];}));
+    largestValue = Math.max.apply(Math, $.map(data, function(e){return e[1];}));
 
     //Create clickable groups for every bar
 
@@ -122,7 +122,7 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
     //Raphael seems to be giving a height for the text that is slightly shorter than the actual height. This causes
     //things like y's and g's to get cut off. My solution? Add a magical '4'. Why 4? Trial and error says that it works.
     labelYPos = s.height - (4+(tallestLabel/2));
-    barLabels.map(function(barLabel){barLabel.attr({y: labelYPos});});
+    $.map(barLabels, function(barLabel){barLabel.attr({y: labelYPos});});
 
     //Start the bars at the position of the text labels and the move up by the amount of label padding
     //Since the labelYPos has Y in the middle of the text object (Raphael doesn't support setting vertical alignment
