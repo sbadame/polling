@@ -37,30 +37,6 @@ String.prototype.format = function() {
     });
 };
 
-//More monkey patching to add support for tooltips!
-//http://www.strathausen.eu/en/2010/04/25/raphael-svg-tooltip/
-Raphael.el.tooltip = function (tp) {
-    this.tp = tp;
-    this.tp.ox = 0;
-    this.tp.oy = 0;
-    this.tp.hide();
-    this.hover(
-        function(event){ 
-            this.mousemove(function(event){ 
-                this.tp.translate(event.clientX - 
-                    this.tp.ox,event.clientY - this.tp.oy);
-                this.tp.ox = event.clientX;
-                this.tp.oy = event.clientY;
-            });
-            this.tp.show().toFront();
-        }, 
-        function(event){
-            this.tp.hide();
-            this.unmousemove();
-            });
-    return this;
-};
-
 /**
  * Given an element and some data this function will make a bar char for you!
  * element: The HTML dom element to put the svg data in
@@ -69,6 +45,7 @@ Raphael.el.tooltip = function (tp) {
  * overrides: A list of settings that you can override
  */
 function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
+    var voted = false;
     if (overrides == undefined) {
         overrides = [];
     }
@@ -214,10 +191,24 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
 
         //I can't beleive that the only way to get a variable by value
         //is to pass it through a function.
-        (function(group, localIndex){
+        (function(group, localIndex, localBar, localText, localBarHeight){
             group.click(function(e) {
-                var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
+                if (voted) {
+                    return;
+                }
+                voted = true;
+                var args = {"choice":choiceIds[localIndex][1], "csrfmiddlewaretoken":csrftoken};
                 $.post(voteurl, args);
+
+                //The bar
+                var newBarHeight = localBarHeight + tickSize; //Each tick represents: 1, so just add one tick
+                var newBarTop = startBarHeight - newBarHeight;
+                localBar.animate({y: newBarTop, height: newBarHeight}, animationTime, '<>');
+
+                //The label above the bar
+                localText.attr({text: data[localIndex][1] + 1});
+                //Amazing parseInt needs to know what base to parse the int into...
+                localText.animate({y: localText.attr("y") - tickSize}, animationTime, '<>');
             }).hover(
                 //Mouse over
                 function (e) {
@@ -229,7 +220,7 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
                     group.unmousemove();
                 }
             );
-        })(groups[index], index);
+        })(groups[index], index, bar, text, barHeight);
 
         //Keep moving x along to the next bar
         x += barWidth + s.barPadding;
