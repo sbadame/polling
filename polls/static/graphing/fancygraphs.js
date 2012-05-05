@@ -37,6 +37,30 @@ String.prototype.format = function() {
     });
 };
 
+//More monkey patching to add support for tooltips!
+//http://www.strathausen.eu/en/2010/04/25/raphael-svg-tooltip/
+Raphael.el.tooltip = function (tp) {
+    this.tp = tp;
+    this.tp.ox = 0;
+    this.tp.oy = 0;
+    this.tp.hide();
+    this.hover(
+        function(event){ 
+            this.mousemove(function(event){ 
+                this.tp.translate(event.clientX - 
+                    this.tp.ox,event.clientY - this.tp.oy);
+                this.tp.ox = event.clientX;
+                this.tp.oy = event.clientY;
+            });
+            this.tp.show().toFront();
+        }, 
+        function(event){
+            this.tp.hide();
+            this.unmousemove();
+            });
+    return this;
+};
+
 /**
  * Given an element and some data this function will make a bar char for you!
  * element: The HTML dom element to put the svg data in
@@ -194,13 +218,17 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
             group.click(function(e) {
                 var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
                 $.post(voteurl, args);
-            }).mouseover(function (e) {
-                console.log(e);
-                group.attr({"stroke-width":3, "stroke-linejoin":"bevel"});
-            }).mouseout(function (e) {
-                group.attr({"stroke-width":1, "stroke-linejoin":"square"});
-            });
-
+            }).hover(
+                //Mouse over
+                function (e) {
+                    group.attr({"stroke-width":3, "stroke-linejoin":"bevel"});
+                },
+                //Mouse out
+                function (e) {
+                    group.attr({"stroke-width":1, "stroke-linejoin":"square"});
+                    group.unmousemove();
+                }
+            );
         })(groups[index], index);
 
         //Keep moving x along to the next bar
