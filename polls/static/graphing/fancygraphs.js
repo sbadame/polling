@@ -191,10 +191,16 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
         //I can't beleive that the only way to get a variable by value
         //is to pass it through a function.
         (function(group, localIndex){
-            group.click(function(e){
+            group.click(function(e) {
                 var args = {"choice":choiceIds[localIndex], "csrfmiddlewaretoken":csrftoken};
                 $.post(voteurl, args);
+            }).mouseover(function (e) {
+                console.log(e);
+                group.attr({"stroke-width":3, "stroke-linejoin":"bevel"});
+            }).mouseout(function (e) {
+                group.attr({"stroke-width":1, "stroke-linejoin":"square"});
             });
+
         })(groups[index], index);
 
         //Keep moving x along to the next bar
