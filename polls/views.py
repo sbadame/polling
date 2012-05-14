@@ -3,11 +3,10 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
-from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote
+from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote,RandomPollList
 from django.views.decorators.cache import cache_page
 import datetime
 import haystack
-import random
 import hashlib
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
@@ -71,27 +70,10 @@ def view_private(request, private_hash):
     return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
 
 def get_random_poll():
-    """
-    In a perfect world, just picking a number from 0 -  Poll.objects.count() would work. Sadly
-    polls get deleted. (Like poll 11 on my computer doesn't exist...)
-    OK so we need a random, poll. Django gives us something for that: *.order_by('?'). Too bad
-    its performance is utter garbage on mysql.
-    So lets take the perro approach but wrap it a while loop to make sure that our id actually exists.
-    TODO: make this handle the case of a sparse database better. (Or maybe it should encourage dense DBs)
-    """
-
-    #TODO: Super crazy weird bug. using Public_Poll.objects.count()
-    #Makes the server unresponsive... fun eh?
-    poll_count = Poll.objects.count()
-    while True:
-        rand_poll_id = random.randint(1,poll_count-1)
-        try:
-            random_poll = Public_Poll.objects.get(id=rand_poll_id)
-            return random_poll
-        except Poll.DoesNotExist:
-            #Darn it! Got a row that doesn't exist... try again...
-            pass
-
+    from settings import NUMBER_OF_RANDOM_POLLS
+    import random
+    index = random.randint(0, NUMBER_OF_RANDOM_POLLS - 1)
+    return RandomPollList.objects.get(index=index).poll
 
 #@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
