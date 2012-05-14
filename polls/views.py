@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
-from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote,RandomPollList
+from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote,RandomPollPick
 from django.views.decorators.cache import cache_page
 import datetime
 import haystack
@@ -73,7 +73,7 @@ def get_random_poll():
     from settings import NUMBER_OF_RANDOM_POLLS
     import random
     index = random.randint(0, NUMBER_OF_RANDOM_POLLS - 1)
-    return RandomPollList.objects.get(index=index).poll
+    return RandomPollPick.objects.get(index=index).poll
 
 #@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):

@@ -1,7 +1,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from polls.models import Public_Poll
-from polls.models import RandomPollList
+from polls.models import RandomPollPick
 from datetime import datetime
 from settings import NUMBER_OF_RANDOM_POLLS as NUMBER_OF_POLLS
 
@@ -15,16 +15,16 @@ class Command(BaseCommand):
 
             #Get rid of the old index for this poll if it exists
             try:
-                oldentry = RandomPollList.objects.get(poll=pick)
+                oldentry = RandomPollPick.objects.get(poll=pick)
                 oldentry.delete()
-            except RandomPollList.DoesNotExist:
+            except RandomPollPick.DoesNotExist:
                 pass
 
             try:
-                randomEntry = RandomPollList.objects.get(index=index)
+                randomEntry = RandomPollPick.objects.get(index=index)
                 randomEntry.poll = pick
-            except RandomPollList.DoesNotExist:
-                randomEntry = RandomPollList.objects.create(index=index, poll=pick)
+            except RandomPollPick.DoesNotExist:
+                randomEntry = RandomPollPick.objects.create(index=index, poll=pick)
 
             randomEntry.save()
 

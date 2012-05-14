@@ -172,7 +172,7 @@ class Vote(models.Model):
     def __unicode__(self):
         return self.hash
 
-class RandomPollList(models.Model):
+class RandomPollPick(models.Model):
     poll = models.ForeignKey(Public_Poll, unique=True)
     index = models.PositiveSmallIntegerField()
 
