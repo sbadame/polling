@@ -157,7 +157,6 @@ class Private_Poll(Poll):
 
         return result if result else "0"
 
-
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
     choice = models.CharField(max_length=200)
@@ -172,3 +171,8 @@ class Vote(models.Model):
 
     def __unicode__(self):
         return self.hash
+
+class RandomPollList(models.Model):
+    poll = models.ForeignKey(Public_Poll, unique=True)
+    index = models.PositiveSmallIntegerField()
+
