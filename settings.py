@@ -3,6 +3,8 @@
 # import logging
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',)
 
+NUMBER_OF_RANDOM_POLLS = 2
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
