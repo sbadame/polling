@@ -106,7 +106,7 @@
 
     <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
 
-    <field name="suggestions" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="choices" type="text" indexed="true" stored="true" multiValued="true" />
 
     <field name="date_created" type="date" indexed="true" stored="true" multiValued="false" />
 
