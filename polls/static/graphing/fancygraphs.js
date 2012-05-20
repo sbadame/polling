@@ -197,8 +197,8 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
                     return;
                 }
                 voted = true;
-                var args = {choice:choiceIds[localIndex], csrfmiddlewaretoken:csrftoken};
-                $.post(voteurl, args, function(data){ console.log(data); });
+                var args = {choice:data[localIndex][0], csrfmiddlewaretoken:csrftoken};
+                $.post(voteurl, args);
 
                 //The bar
                 var newBarHeight = localBarHeight + tickSize; //Each tick represents: 1, so just add one tick

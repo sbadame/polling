@@ -15,8 +15,10 @@ urlpatterns = patterns('',
     url(r'^contact$', contact_view),
     url(r'^$','polls.views.index', name = 'index_view'),
     url(r'^(?P<poll_id>\d+)/$', 'polls.views.view', name = 'poll_view'),
+    url(r'^(?P<poll_id>\d+)\.png$', 'polls.image.view_public', name = 'poll_image'),
     url(r'^(?P<poll_id>\d+)/vote/$', 'polls.views.vote_public'),
     url(r'^private/(?P<private_hash>[a-zA-Z0-9]+)/$', 'polls.views.view_private', name = 'private_view'),
+    url(r'^private/(?P<private_hash>[a-zA-Z0-9]+)\.png$', 'polls.image.view_private', name = 'private_image'),
     url(r'^private/(?P<private_hash>[a-zA-Z0-9]+)/vote/$', 'polls.views.vote_private'),
 
     # Search page(s)

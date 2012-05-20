@@ -63,11 +63,7 @@ def view(request, poll_id):
 
 def view_private(request, private_hash):
     poll = get_object_or_404(Private_Poll, private_hash=private_hash)
-    if poll.has_expired() or already_voted(request, poll):
-        template = "results.html"
-    else:
-        template = "detail.html"
-    return render_to_response(template, {'poll' : poll}, context_instance=RequestContext(request))
+    return render_to_response("results.html", {'poll' : poll}, context_instance=RequestContext(request))
 
 def get_random_poll():
     from settings import NUMBER_OF_RANDOM_POLLS
@@ -102,7 +98,8 @@ def vote_private(request, private_hash):
 
 def vote(request, poll):
     try:
-        selected_choice = poll.choice_set.get(pk=request.POST['choice'])
+        choice_name = request.POST['choice']
+        selected_choice = poll.choice_set.get(choice=choice_name)
     except (KeyError, Choice.DoesNotExist):
         return render_to_response('detail.html', {'poll':poll, 'error_message':"You didn't select a choice."},
                 context_instance= RequestContext(request))

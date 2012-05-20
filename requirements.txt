@@ -7,6 +7,9 @@ django-haystack==1.2.6
 django-pipeline==1.2c1
 django-staticfiles==1.2.1
 ipython==0.12
+matplotlib==1.1.0
+numpy==1.6.2
+pybloomfilter==1.0
 pybloomfiltermmap==0.3.2
 pylibmc==1.2.2
 pysolr==2.1.0-beta
