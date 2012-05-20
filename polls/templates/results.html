@@ -21,8 +21,9 @@
             <h2>Poll Fun Facts</h2>
             <ul>
                 <li>Date Created: {{ poll.date_created }}</li>
-                <li>Date to Expire: {{poll.date_expire }}</li>
+                <li>Date to Expire: {{ poll.date_expire }}</li>
                 <li>Total Votes: {{ poll.total_votes }}</li>
+                <li>Link: <a href="{{ request.META.HTTP_HOST }}{{ poll.get_absolute_url }}"> Link </a> </li>
             </ul>
         </div>
     </div>
