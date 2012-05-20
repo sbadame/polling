@@ -123,6 +123,11 @@ def cmd_update(args):
     run("pip install -r requirements.txt")
     run("python manage.py migrate polls")
 
+def cmd_update_solr_schema(args):
+    out, _ = run('/usr/bin/env python2.7 manage.py build_solr_schema')
+    f = open('solr/example/solr/conf/schema.xml', 'w')
+    f.write(out)
+
 def error(msg, err=""):
     print("OUT: %s\nERR: %s" % (msg,err))
     sys.exit(-1)
