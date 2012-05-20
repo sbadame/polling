@@ -1,4 +1,5 @@
 import datetime
+from pybloomfilter import BloomFilter
 from django.db import models
 import hashlib
 
@@ -28,13 +29,16 @@ class Poll(models.Model):
             'date_expire',
             default = datetime.datetime.now() + time_delta_to_expire)
     total_votes = models.IntegerField(default=0)
-    seen_ips = models.TextField()
+    ips_seen = models.TextField()
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]
 
     def has_expired(self):
         return self.date_expire < datetime.datetime.now()
+
+    def num_different_ips(self):
+        return len(BloomFilter.from_base64('/tmp/polls.bloom', self.ips_seen))
 
     @models.permalink
     def get_absolute_url(self):
@@ -70,7 +74,8 @@ class Public_Poll(Poll):
         if "date_expire" not in kwargs:
             kwargs["date_expire"] = kwargs["date_created"] + Poll.time_delta_to_expire
 
-        newpoll = Public_Poll.objects.create(question=question, **kwargs)
+        empty_bloomfilter = BloomFilter(1000, 0.01, '/tmp/temp.bloom').to_base64()
+        newpoll = Public_Poll.objects.create(question=question, ips_seen=empty_bloomfilter, **kwargs)
 
         for choice in choices:
             newpoll.choice_set.create(choice=choice, votes=0)
@@ -124,7 +129,8 @@ class Private_Poll(Poll):
             base16 = hasher.hexdigest()
             kwargs["private_hash"] = Private_Poll.convertBase16ToBase62(base16)
 
-        newpoll = Private_Poll.objects.create(question=question, **kwargs)
+        empty_bloomfilter = BloomFilter(1000, 0.01, '/tmp/temp.bloom').to_base64()
+        newpoll = Private_Poll.objects.create(question=question, ips_seen=empty_bloomfilter, **kwargs)
 
         for choice in choices:
             newpoll.choice_set.create(choice=choice, votes=0)

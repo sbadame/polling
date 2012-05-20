@@ -23,6 +23,7 @@
                 <li>Date Created: {{ poll.date_created }}</li>
                 <li>Date to Expire: {{ poll.date_expire }}</li>
                 <li>Total Votes: {{ poll.total_votes }}</li>
+                <li>Atleast {{ poll.num_different_ips }} different ips have voted on this poll.</li>
                 <li>Link: <a href="{{ request.META.HTTP_HOST }}{{ poll.get_absolute_url }}"> Link </a> </li>
             </ul>
         </div>

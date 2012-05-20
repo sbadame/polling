@@ -113,6 +113,13 @@ def vote(request, poll):
         selected_choice.votes += 1
         poll.vote_set.create(hash=hash)
         selected_choice.save()
+
+        #Update the seen ips
+        from pybloomfilter import BloomFilter
+        bf = BloomFilter.from_base64('/tmp/bloom.filter', poll.ips_seen)
+        bf.add(request.META['REMOTE_ADDR'])
+        poll.ips_seen = bf.to_base64()
+
         poll.save()
 
     return None
