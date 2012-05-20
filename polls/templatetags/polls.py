@@ -4,8 +4,7 @@ import settings
 
 register = template.Library()
 
-
-@register.tag('create_poll')
+@register.tag('poll_script')
 def do_render_poll(parser, tokens):
     try:
         tag_name, poll, domElem = tokens.split_contents()
