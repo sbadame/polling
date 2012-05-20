@@ -48,5 +48,3 @@ class PollNode(template.Node):
         static = settings.STATIC_URL
         return html % {"static":static, "data":data, "choiceIds":choiceIds, "voteURL":voteURL, "csrf":csrf, "domElem":self.domElem}
 
-
-
