@@ -1,3 +1,5 @@
 {{ object.question }}
 {{ object.date_created}}
-{{ object.choices}}
+{% for choice in object.choices %}
+    {{ choice }}
+{% endfor %}

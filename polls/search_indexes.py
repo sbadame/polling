@@ -12,10 +12,7 @@ class Public_PollIndex(SearchIndex):
         return Public_Poll
 
     def prepare_choices(self, obj):
-        # For some silly reason we get (u"choice",) instead of just u"choice"
-        # So we unpack...
-        c = [ str(c) for (c,) in obj.choice_set.values_list('choice') ]
-        return c
+        return obj.choice_set.values_list('choice', flat=True)
 
     def index_queryset(self):
         return self.get_model().objects.filter(date_created__lte=datetime.datetime.now())
