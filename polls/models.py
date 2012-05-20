@@ -29,7 +29,9 @@ class Poll(models.Model):
             'date_expire',
             default = datetime.datetime.now() + time_delta_to_expire)
     total_votes = models.IntegerField(default=0)
+
     ips_seen = models.TextField()
+    ips_count = models.IntegerField(default=0)
 
     def results(self):
         return [ (c.choice, c.votes) for c in self.choice_set.all()]

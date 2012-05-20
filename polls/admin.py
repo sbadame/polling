@@ -15,6 +15,7 @@ class PollAdmin(admin.ModelAdmin):
         (None, {'fields': ['total_votes']}),
         (None, {'fields': ['date_created']}),
         (None, {'fields': ['date_expire']}),
+        (None, {'fields': ['ips_count']}),
         (None, {'fields': ['ips_seen']}),
     ]
     inlines = [ChoiceInline,VoteInline]

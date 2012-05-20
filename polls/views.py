@@ -117,8 +117,11 @@ def vote(request, poll):
         #Update the seen ips
         from pybloomfilter import BloomFilter
         bf = BloomFilter.from_base64('/tmp/bloom.filter', poll.ips_seen)
-        bf.add(request.META['REMOTE_ADDR'])
-        poll.ips_seen = bf.to_base64()
+        alreadyseen = bf.add(request.META['REMOTE_ADDR'])
+
+        if not alreadyseen:
+            poll.ips_seen = bf.to_base64()
+            poll.ips_count += 1
 
         poll.save()
 
