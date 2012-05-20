@@ -11,10 +11,11 @@ class VoteInline(admin.TabularInline):
 
 class PollAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['question']}),
-        ('Total Votes', {'fields': ['total_votes']}),
-        ('Date Created Info', {'fields': ['date_created']}),
-        ('Date Expire Info', {'fields': ['date_expire']}),
+        (None, {'fields': ['question']}),
+        (None, {'fields': ['total_votes']}),
+        (None, {'fields': ['date_created']}),
+        (None, {'fields': ['date_expire']}),
+        (None, {'fields': ['seen_ips']}),
     ]
     inlines = [ChoiceInline,VoteInline]
     list_display = ('question', 'get_absolute_url', 'get_vote_url', 'total_votes', 'date_created', 'date_expire')
