@@ -14,22 +14,34 @@
             <input type="radio" name="pub_priv" value="Public" checked>Make Public Poll <br>
             <input type="radio" name="pub_priv" value="Private">Make Private Poll<br><br>
 
-            <!--<label for="questioninput"> Question: </label>-->
-            <input type="text" name="question" id="questioninput" value="Enter Your Question Here" onblur="if
+            <noscript>
+                Question:
+            </noscript>
+            <input type="text" name="question" id="questioninput" onblur="if
             (this.value == '') {this.value = 'Enter Your Question Here';}" onfocus="if (this.value == 'Enter Your Question Here') {this.value = '';}" />
             <br />
             <div id="options">
-                <!--<label for="choice1input"> Choice 1 : </label>-->
-                <input type="text" name="choice1" id="choice1input" value="Choice 1" onblur="if(this.value =='')
-                {this.value = 'Choice 1';}" onfocus="if (this.value == 'Choice 1') {this.value = '';}"/>
+
+                <noscript> Choice 1: </noscript> 
+                <input type="text" name="choice1" id="choice1input" />
                 <br />
-                <!--<label for="choice2input"> Choice 2 : </label> -->
-                <input type="text" name="choice2" id="choice2input" value="Choice 2" onblur="if(this.value =='')
-                {this.value = 'Choice 2';}" onfocus="if (this.value == 'Choice 2') {this.value = '';}" />
+
+                <noscript> Choice 2: </noscript> 
+                <input type="text" name="choice2" id="choice2input" />
                 <br />
+
+                <noscript>
+                    <!-- Since the "Add another choice button" doesn't really work for non js
+                        Give the noscript people a couple more choices by default -->
+
+                    Choice 3: <input type="text" name="choice3" id="choice3input" />
+                    <br/>
+                    Choice 4: <input type="text" name="choice4" id="choice4input" />
+                </noscript>
             </div>
-            <button type="button" class="btn-small btn" onclick="addPollOption();"> Add Another Choice </button>
-            <br /> <br /> <br /> <br />
+            <div id="addOptionContainer">
+            </div>
+            <br />
             <input type="submit" class="btn-large btn-primary" value="Create Poll!" />
         </form>
     </div>
@@ -82,36 +94,65 @@
 </div><!-- close container -->
 
 
-<script type="text/javascript">
-    optionCount = 3;
-    function addPollOption() {
-        options = document.getElementById("options");
-
-        // Input
-        input = document.createElement("input");
-        input.type = "text";
-        input.name = "choice" + optionCount;
-        input.id = "choice" + optionCount + "input";
-        input.value = "Choice " + optionCount;
-        var input_value_bkup = input.value;
-        input.onblur = function() {if(this.value == '') {this.value = input_value_bkup;}};
-        input.onfocus = function() {if (this.value == input_value_bkup) {this.value = '';}};
-
-        // Label
-        //label = document.createElement("label");
-        //label.htmlFor = input.id;
-        //label.innerHTML = "Choice " + optionCount + " :";
-
-        //Add the nodes
-        //options.appendChild(label);
-        options.appendChild(input);
-        options.appendChild(document.createElement("br"));
-        optionCount++;
-    }
-</script>
-
 {% endblock %}
 
 {% block scripts %}
+    <script type="text/javascript">
+        eventHandlers = {
+            'focus': function(){
+                //Find the first number in the choice,
+                var index = this.id.match(/\d+/);
+                if ($(this).val() == "Choice " + index) {
+                    $(this).val('');
+                }
+            },
+
+            'blur': function(){
+                //Find the first number in the choice,
+                var index = this.id.match(/\d+/);
+                if ($(this).val() == "") {
+                    $(this).val('Choice ' + index);
+                }
+            }
+        };
+
+        optionCount = 3;
+        function addPollOption() {
+            options = document.getElementById("options");
+
+            // Input
+            input = document.createElement("input");
+            options.appendChild(input);
+            options.appendChild(document.createElement("br"));
+
+            input.type = "text";
+            input.name = "choice" + optionCount;
+            input.id = "choice" + optionCount + "input";
+            $(input).val("Choice " + optionCount);
+
+            optionCount++;
+            $(input).bind(eventHandlers);
+        }
+
+        $(document).ready(function(){
+            inputs = $("#options input:text");
+            inputs.bind(eventHandlers);
+            inputs.val(function (index) {
+                return "Choice " + (index + 1);
+            });
+
+            var addChoiceButton = document.createElement('input');
+            addChoiceButton.type = "button";
+            $(addChoiceButton).addClass("btn-small btn");
+            addChoiceButton.onclick = addPollOption;
+            addChoiceButton.value = "Add Another Choice";
+
+            var container = document.getElementById("addOptionContainer");
+            container.appendChild(addChoiceButton);
+
+            $("#questioninput").val("Enter Your Question Here");
+
+        });
+    </script>
     {% poll_script random_poll #canvas_container %}
 {% endblock %}
