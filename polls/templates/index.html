@@ -4,93 +4,90 @@
 {% block content %}
 <div class="container">
     <div class="row">
-    <div class="span6">
-        <h2> Create a Poll! </h2>
-        {% if error_message %}
-            <h3> {{ error_message }} </h3>
-        {% endif %}
-        <form action="/create" id="pollForm" method="post">
-            {% csrf_token %}
-            <input type="radio" name="pub_priv" value="Public" checked>Make Public Poll <br>
-            <input type="radio" name="pub_priv" value="Private">Make Private Poll<br><br>
-
-            <noscript>
-                Question:
-            </noscript>
-            <input type="text" name="question" id="questioninput" onblur="if
-            (this.value == '') {this.value = 'Enter Your Question Here';}" onfocus="if (this.value == 'Enter Your Question Here') {this.value = '';}" />
-            <br />
-            <div id="options">
-
-                <noscript> Choice 1: </noscript> 
-                <input type="text" name="choice1" id="choice1input" />
-                <br />
-
-                <noscript> Choice 2: </noscript> 
-                <input type="text" name="choice2" id="choice2input" />
-                <br />
+        <div class="span8">
+            <h3>Check out an Example...</h3>
+            <div class="tabbable tabs-left">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#lA" data-toggle="tab">Random Poll</a></li>
+                    <li><a href="#lB" data-toggle="tab">Most Voted</a></li>
+                    <li><a href="#lC" data-toggle="tab">Most Active</a></li>
+                    <li><a href="#lD" data-toggle="tab">Newest</a></li>
+                    <li><a href="#lE" data-toggle="tab">Hottest</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="lA">
+                        <h4>{{ random_poll.question }}</h4>
+                        <div id="graph"></div>
+                        <div id="canvas_container">
+                            <noscript>
+                            <img src="{{ random_poll.get_image_url }}"/>
+                            <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
+                            {% csrf_token %}
+                                Vote For:
+                                {% for choice in random_poll.choice_set.all %}
+                                        <input type="submit" value="{{ choice.choice }}" name="choice" />
+                                {% endfor %}
+                            </form>
+                            </noscript> 
+                        </div>  <!-- close canvas container --> 
+                    </div> <!-- close table pan active -->
+                    <div class="tab-pane" id="lB">
+                        <p>Most Voted Poll Here</p>
+                    </div> <!-- closes tab pan -->
+                    <div class="tab-pane" id="lC">
+                        <p>Most Active Poll Here</p>
+                    </div> <!-- closes tab-pane -->
+                    <div class="tab-pane" id="lD">
+                        <p>Newest Poll Here</p>
+                    </div> <!-- closes tab-pane -->
+                    <div class="tab-pane" id="lE">
+                        <p>Hotest Poll Here</p>
+                    </div> <!-- closes tab-pane -->
+                </div> <!-- close tab content -->
+            </div> <!-- /tabbable -->
+        </div> <!-- close span6 -->
+        <div class="span3 offset1">
+            <h2> Create a Poll! </h2>
+            {% if error_message %}
+                <h3> {{ error_message }} </h3>
+            {% endif %}
+            <form action="/create" id="pollForm" method="post">
+                {% csrf_token %}
+                <input type="radio" name="pub_priv" value="Public" checked>Make Public Poll <br>
+                <input type="radio" name="pub_priv" value="Private">Make Private Poll<br><br>
 
                 <noscript>
-                    <!-- Since the "Add another choice button" doesn't really work for non js
-                        Give the noscript people a couple more choices by default -->
-
-                    Choice 3: <input type="text" name="choice3" id="choice3input" />
-                    <br/>
-                    Choice 4: <input type="text" name="choice4" id="choice4input" />
+                    Question:
                 </noscript>
-            </div>
-            <div id="addOptionContainer">
-            </div>
-            <br />
-            <input type="submit" class="btn-large btn-primary" value="Create Poll!" />
-        </form>
-    </div>
-    <div class="span6">
-        <h2>Check out an Example...</h2>
-        <h3>{{ random_poll.question }}</h3>
-        <div id="graph"></div>
-        <div id="canvas_container">
-            <noscript>
-                <img src="{{ random_poll.get_image_url }}"/>
-                <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
-                {% csrf_token %}
-                    Vote For:
-                    {% for choice in random_poll.choice_set.all %}
-                        <input type="submit" value="{{ choice.choice }}" name="choice" />
-                    {% endfor %}
-                </form>
-            </noscript>
-        </div>
-    </div>
-    </div>
-<div class="row">
-    <div class="span4">
-        {% if latest_poll_list %}
-            <h2>Newest Polls</h2>
-            <ul>
-                {% for poll in latest_poll_list %}
-                <li><a href="{{ poll.get_absolute_url }}">{{ poll.question }}</a></li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-    <div class="span4">
-        <h2>Most Popular Polls</h2>
-        <ul>
-            {% for poll in popular_poll_list %}
-            <li><a href="{{ poll.get_absolute_url }}">{{ poll.question }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="span4">
-        <h2>Polls About To Expire</h2>
-        <ul>
-            {% for poll in danger_poll_list %}
-            <li><a href="{{ poll.get_absolute_url }}">{{ poll.question }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
+                <input type="text" name="question" id="questioninput" onblur="if
+                (this.value == '') {this.value = 'Enter Your Question Here';}" onfocus="if (this.value == 'Enter Your Question Here') {this.value = '';}" />
+                <br />
+                <div id="options">
+
+                    <noscript> Choice 1: </noscript> 
+                    <input type="text" name="choice1" id="choice1input" />
+                    <br />
+
+                    <noscript> Choice 2: </noscript> 
+                    <input type="text" name="choice2" id="choice2input" />
+                    <br />
+
+                    <noscript>
+                        <!-- Since the "Add another choice button" doesn't really work for non js
+                            Give the noscript people a couple more choices by default -->
+
+                        Choice 3: <input type="text" name="choice3" id="choice3input" />
+                        <br/>
+                        Choice 4: <input type="text" name="choice4" id="choice4input" />
+                    </noscript>
+                </div> <!-- close options -->
+                <div id="addOptionContainer">
+                </div>
+                <br />
+                <input type="submit" class="btn-large btn-primary" value="Create Poll!" />
+            </form>
+        </div> <!-- close span6 -->
+    </div> <!-- close row -->
 </div><!-- close container -->
 
 
