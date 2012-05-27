@@ -7,17 +7,14 @@
         <div class="span8">
             <h3>Check out an Example...</h3>
             <br>
-            <div class="tabbable tabs-left">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#lA" data-toggle="tab">Random Poll</a></li>
-                    <li><a href="#lB" data-toggle="tab">Most Voted</a></li>
-                    <li><a href="#lC" data-toggle="tab">Most Active</a></li>
-                    <li><a href="#lD" data-toggle="tab">Newest</a></li>
-                    <li><a href="#lE" data-toggle="tab">Hottest</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="lA">
-                        <h4>{{ random_poll.question }}</h4>
+            <div id="myCarousel" class="carousel">
+                <!-- Carousel items -->
+                <div class="carousel-inner">
+                    <div class="active item">
+                        <div class="carousel-caption">
+                            <h4>Random Poll</h4>
+                            <h5>{{ random_poll.question }}</h5>
+                        </div>
                         <div id="graph"></div>
                         <div id="canvas_container">
                             <noscript>
@@ -31,22 +28,15 @@
                             </form>
                             </noscript> 
                         </div>  <!-- close canvas container --> 
-                    </div> <!-- close table pan active -->
-                    <div class="tab-pane" id="lB">
-                        <p>Most Voted Poll Here</p>
-                    </div> <!-- closes tab pan -->
-                    <div class="tab-pane" id="lC">
-                        <p>Most Active Poll Here</p>
-                    </div> <!-- closes tab-pane -->
-                    <div class="tab-pane" id="lD">
-                        <p>Newest Poll Here</p>
-                    </div> <!-- closes tab-pane -->
-                    <div class="tab-pane" id="lE">
-                        <p>Hotest Poll Here</p>
-                    </div> <!-- closes tab-pane -->
-                </div> <!-- close tab content -->
-            </div> <!-- /tabbable -->
-        </div> <!-- close span6 -->
+                    </div>
+                    <div class="item">Item 2</div>
+                    <div class="item">Item 3</div>
+                </div>
+            <!-- Carousel nav -->
+            <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+            <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+            </div>
+        </div> <!-- close span8 -->
         <div class="span3 offset1">
             <h2> Create a Poll! </h2>
             <br>
