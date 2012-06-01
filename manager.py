@@ -39,6 +39,7 @@ def jobs():
         import time
         while True:
             run("python manage.py update_random")
+            run("python manage.py update_newest")
             time.sleep(setting("JOB_TIME_MINUTES", 5) * 60)
     else:
         updatepid("jobs", pid)
