@@ -29,6 +29,16 @@ def runserver():
     else:
         updatepid("runserver", pid)
 
+def cronjobs():
+    pid = os.fork()
+    if pid == 0:
+        import time
+        while True:
+            run("python manager.py update_random")
+            time.sleep(5)
+    else:
+        updatepid("jobs", pid)
+
 def cmd_stat(args):
     '''
     [all|<any process>]
