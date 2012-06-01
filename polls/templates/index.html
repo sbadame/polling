@@ -32,7 +32,9 @@
                         </div>  <!-- close canvas container --> 
                     </div> <!-- close table pan active -->
                     <div class="tab-pane" id="lB">
-                        <p>Most Voted Poll Here</p>
+                        {% for poll in mostvoted_poll_list %}
+                            <p>{{ poll.question }}</p>
+                        {% endfor %}
                     </div> <!-- closes tab pan -->
                     <div class="tab-pane" id="lC">
                         <p>Most Active Poll Here</p>

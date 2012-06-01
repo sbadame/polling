@@ -197,3 +197,6 @@ class NewestPollPick(models.Model):
     poll = models.ForeignKey(Public_Poll, unique=True)
     index = models.PositiveSmallIntegerField()
 
+class MostVotedPollPick(models.Model):
+    poll = models.ForeignKey(Public_Poll, unique=True)
+    index = models.PositiveSmallIntegerField()
