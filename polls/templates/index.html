@@ -18,7 +18,6 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="lA">
                         <h4>{{ random_poll.question }}</h4>
-                        <div id="graph"></div>
                         <div id="canvas_container">
                             <noscript>
                             <img src="{{ random_poll.get_image_url }}"/>
@@ -39,7 +38,10 @@
                         <p>Most Active Poll Here</p>
                     </div> <!-- closes tab-pane -->
                     <div class="tab-pane" id="lD">
-                        <p>Newest Poll Here</p>
+                        <!-- TODO(sandro): actually render some friggen polls here... -->
+                        {% for poll in latest_poll_list %}
+                            <p>{{ poll.question }}</p>
+                        {% endfor %}
                     </div> <!-- closes tab-pane -->
                     <div class="tab-pane" id="lE">
                         <p>Hotest Poll Here</p>
