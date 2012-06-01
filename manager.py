@@ -8,6 +8,10 @@ import local_settings
 
 argument_prefix = "cmd_"
 
+""" For every entry in the tasks array there needs to be a function with that name that starts that process and stores
+it's pid """
+tasks = ["memcached", "solr", "runserver", "jobs"]
+
 tempfile = ".managerprocs"
 persisted = eval( file(tempfile).read() if os.path.exists(tempfile) else "{}" )
 
@@ -29,13 +33,13 @@ def runserver():
     else:
         updatepid("runserver", pid)
 
-def cronjobs():
+def jobs():
     pid = os.fork()
     if pid == 0:
         import time
         while True:
-            run("python manager.py update_random")
-            time.sleep(5)
+            run("python manage.py update_random")
+            time.sleep(setting("JOB_TIME_MINUTES", 5) * 60)
     else:
         updatepid("jobs", pid)
 
@@ -61,7 +65,7 @@ def cmd_start(args):
     '''
     if "all" in args:
         if len(args) == 1:
-            cmd_start(["memcached", "solr", "runserver"])
+            cmd_start(tasks)
         else:
             print("Check your arguments! Can't start everything AND a process!")
     else:
@@ -77,7 +81,7 @@ def cmd_stop(commands):
         Kills the processes passed in or all of the known running processes.
     '''
     if commands == ["all"]:
-        cmd_stop(["memcached", "solr", "runserver"])
+        cmd_stop(tasks)
     else:
         for command in commands:
             pid = app_pid(command)
@@ -142,11 +146,11 @@ def error(msg, err=""):
     print("OUT: %s\nERR: %s" % (msg,err))
     sys.exit(-1)
 
-def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, **kwargs):
-    print("Running: %s" % cmd, end="")
+def run(cmd, name=None, waitForExit=True, waitFor=None, waitSeconds=1, verbose=True, **kwargs):
+    if verbose: print("Running: %s" % cmd, end="")
 
     p = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE, stderr = subprocess.PIPE, **kwargs)
-    print(" has pid: %d" % p.pid)
+    if verbose: print(" has pid: %d" % p.pid)
 
     if name: updatepid(name, p.pid)
 
