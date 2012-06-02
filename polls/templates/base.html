@@ -4,17 +4,18 @@
         {% load compressed %}
         {% compressed_css 'custombootstrap' %}
         <title>{% block title %}gimme a poll{% endblock %}</title>
+        <!--<style>
+             .container { background: lightgray; }
+         </style> -->
     </head>
     <body>
         <div class="container">
-            <header>
             <br>
-            <h1 align="center"><big>Gimme A Poll!</big></h1>
-            <br>
-            <form action="{% url search %}" id="searchForm" method="get" align="center">
+            <img src="../static/logo.png"/>
+            <img src="../static/title.png" alt="GimmeaPoll"/>
+            <form action="{% url search %}" id="searchForm" method="get" align="right">
                 <input type="text" name="q" class="search-query span2" placeholder="Search Polls" id="searchinput">
             </form>
-            </header>
         </div> <!--close container -->
 
     <div id ="content">
@@ -28,16 +29,16 @@
     </div>
 
     <footer>
-        <br><br><br>
         <div class="container">
+            <br><br>
             <div class="row">
                 <div class="span4">
                     <h5>What Is This? And Why Am I Here?</h5> <br>
-                    <p><small> Wonder what people are thinking? Making a poll is quick and easy: No fee, No registration. Go for it! </small> </p>
+                    <p> Wonder what people are thinking? Making a poll is quick and easy: No fee, No registration. Go for it! </p>
                 </div> <!-- close span4 -->
                 <div class="span4">
                     <h5>Awesome! Can I Help?</h5> <br>
-                    <p><small> Sure! Check us out at: <a href="http://www.github.com/sbadame/polling">github.com</a></small></p>
+                    <p> Sure! Check us out at: <a href="http://www.github.com/sbadame/polling">github.com</a></p>
                 </div> <!-- close span4 -->
                 <div class="span4">
                     <h5>Some Other Cool Stuff</h5> <br>

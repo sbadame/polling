@@ -5,9 +5,7 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <h3>Check out an Example...</h3>
-            <br>
-            <div id="myCarousel" class="carousel">
+            <div id="myCarousel" class="carousel slide">
                 <!-- Carousel items -->
                 <div class="carousel-inner">
                     <div class="active item">
@@ -15,10 +13,9 @@
                             <h4>Random Poll</h4>
                             <h5>{{ random_poll.question }}</h5>
                         </div>
-                        <div id="graph"></div>
                         <div id="canvas_container">
                             <noscript>
-                            <img src="{{ random_poll.get_image_url }}"/>
+                            <img src="{{ random_poll.get_image_url }}" style="margin: 0 auto;"/>
                             <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
                             {% csrf_token %}
                                 Vote For:
@@ -37,7 +34,7 @@
             <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
             </div>
         </div> <!-- close span8 -->
-        <div class="span3 offset1">
+        <div class="span4">
             <h2> Create a Poll! </h2>
             <br>
             {% if error_message %}

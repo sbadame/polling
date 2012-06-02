@@ -11,6 +11,7 @@
   overflow: hidden;
   width: 100%;
   position: relative;
+  text-align: center;
 }
 
 .carousel {
@@ -18,12 +19,13 @@
   .item {
     display: none;
     position: relative;
+    padding-left: 60px;
     .transition(.6s ease-in-out left);
   }
 
   // Account for jankitude on images
   .item > img {
-    display: block;
+    display: none;
     line-height: 1;
   }
 
@@ -111,6 +113,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  width: 470px;
   padding: 10px 15px 5px;
   background: @grayDark;
   background: rgba(0,0,0,.75);
