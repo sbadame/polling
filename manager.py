@@ -41,6 +41,7 @@ def jobs():
             run("python manage.py update_random")
             run("python manage.py update_newest")
             run("python manage.py update_mostvoted")
+            run("python manage.py update_popular")
             time.sleep(setting("JOB_TIME_MINUTES", 5) * 60)
     else:
         updatepid("jobs", pid)

@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from django.core.management.base import BaseCommand, CommandError
 from polls.models import Public_Poll, MostVotedPollPick
