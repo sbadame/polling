@@ -4,16 +4,51 @@ import settings
 
 register = template.Library()
 
-@register.tag('poll_script')
+poll_html = '''
+    <div class="poll_container" id="canvas_container">
+        <noscript>
+        <img src="{{ random_poll.get_image_url }}" style="margin: 0 auto;"/>
+        <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
+        {% csrf_token %}
+            Vote For:
+            {% for choice in random_poll.choice_set.all %}
+                    <input type="submit" value="{{ choice.choice }}" name="choice" />
+            {% endfor %}
+        </form>
+        </noscript> 
+    </div>'''
+
+@register.tag('poll')
 def do_render_poll(parser, tokens):
+    try:
+        tag_name, poll = tokens.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag requires exactly 1 arguement" % tokens.contents.split()[0])
+    return PollNode(poll)
+
+class PollNode(template.Node):
+
+    def __init__(self, poll):
+        self.poll = template.Variable(poll)
+
+    def render(self, context):
+        try:
+            poll = self.poll.resolve(context)
+        except template.VariableDoesNotExist:
+            return ''
+        return '<h1>Sandro: %s<h1>' % poll.question
+
+
+@register.tag('poll_script')
+def do_render_poll_script(parser, tokens):
     try:
         tag_name, poll, domElem = tokens.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly two arguments" % tokens.contents.split()[0])
-    return PollNode(poll, domElem)
+    return PollScriptNode(poll, domElem)
 
 
-html="""    <style type="text/css">
+script_html="""    <style type="text/css">
         %(domElem)s {
             width: 500px;
             height: 300px;
@@ -29,7 +64,7 @@ html="""    <style type="text/css">
         });
     </script>"""
 
-class PollNode(template.Node):
+class PollScriptNode(template.Node):
 
     def __init__(self, poll, domElem):
         self.poll = template.Variable(poll)
@@ -46,5 +81,5 @@ class PollNode(template.Node):
         csrf = context.get('csrf_token', None)
 
         static = settings.STATIC_URL
-        return html % {"static":static, "data":data, "choiceIds":choiceIds, "voteURL":voteURL, "csrf":csrf, "domElem":self.domElem}
+        return script_html % {"static":static, "data":data, "choiceIds":choiceIds, "voteURL":voteURL, "csrf":csrf, "domElem":self.domElem}
 
