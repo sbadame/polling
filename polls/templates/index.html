@@ -5,21 +5,17 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <h3>Check out an Example...</h3>
-            <br>
-            <div class="tabbable tabs-left">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#lA" data-toggle="tab">Random Poll</a></li>
-                    <li><a href="#lB" data-toggle="tab">Most Voted</a></li>
-                    <li><a href="#lD" data-toggle="tab">Newest</a></li>
-                    <li><a href="#lE" data-toggle="tab">Hottest</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="lA">
-                        <h4>{{ random_poll.question }}</h4>
+            <div id="myCarousel" class="carousel slide">
+                <!-- Carousel items -->
+                <div class="carousel-inner">
+                    <div class="active item">
+                        <div class="carousel-caption">
+                            <h4>Random Poll</h4>
+                            <h5>{{ random_poll.question }}</h5>
+                        </div>
                         <div id="canvas_container">
                             <noscript>
-                            <img src="{{ random_poll.get_image_url }}"/>
+                            <img src="{{ random_poll.get_image_url }}" style="margin: 0 auto;"/>
                             <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
                             {% csrf_token %}
                                 Vote For:
@@ -29,28 +25,43 @@
                             </form>
                             </noscript> 
                         </div>  <!-- close canvas container --> 
-                    </div> <!-- close table pan active -->
-                    <div class="tab-pane" id="lB">
+                    </div> <!-- close carousel item -->
+                    <div class="item">
+                        <div class="carousel-caption">
+                            <h4> Most Voted </h4>
+                            <h5> Our polls with the most votes! </h5>
+                        </div>
                         {% for poll in mostvoted_poll_list %}
                             <p>{{ poll.question }}</p>
                         {% endfor %}
-                    </div> <!-- closes tab pan -->
-                    <div class="tab-pane" id="lD">
+                    </div>
+                    <div class="item">
+                        <div class="carousel-caption">
+                            <h4> Latest </h4>
+                            <h5> Our latest polls! </h5>
+                        </div>
                         <!-- TODO(sandro): actually render some friggen polls here... -->
                         {% for poll in latest_poll_list %}
                             <p>{{ poll.question }}</p>
                         {% endfor %}
                     </div> <!-- closes tab-pane -->
-                    <div class="tab-pane" id="lE">
+                    <div class="item">
+                        <div class="carousel-caption">
+                            <h4> Hottest </h4>
+                            <h5> Our hottest polls! </h5>
+                        </div>
                         <!-- TODO(sandro): actually render some friggen polls here... -->
                         {% for poll in hottest_poll_list %}
                             <p>{{ poll.question }}</p>
                         {% endfor %}
                     </div> <!-- closes tab-pane -->
-                </div> <!-- close tab content -->
-            </div> <!-- /tabbable -->
-        </div> <!-- close span6 -->
-        <div class="span3 offset1">
+                    <!-- Carousel nav -->
+                    <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+                    <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+                </div>
+            </div>
+        </div>
+        <div class="span4">
             <h2> Create a Poll! </h2>
             <br>
             {% if error_message %}
