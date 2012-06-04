@@ -11,7 +11,6 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#lA" data-toggle="tab">Random Poll</a></li>
                     <li><a href="#lB" data-toggle="tab">Most Voted</a></li>
-                    <li><a href="#lC" data-toggle="tab">Most Active</a></li>
                     <li><a href="#lD" data-toggle="tab">Newest</a></li>
                     <li><a href="#lE" data-toggle="tab">Hottest</a></li>
                 </ul>
@@ -36,9 +35,6 @@
                             <p>{{ poll.question }}</p>
                         {% endfor %}
                     </div> <!-- closes tab pan -->
-                    <div class="tab-pane" id="lC">
-                        <p>Most Active Poll Here</p>
-                    </div> <!-- closes tab-pane -->
                     <div class="tab-pane" id="lD">
                         <!-- TODO(sandro): actually render some friggen polls here... -->
                         {% for poll in latest_poll_list %}
@@ -46,7 +42,10 @@
                         {% endfor %}
                     </div> <!-- closes tab-pane -->
                     <div class="tab-pane" id="lE">
-                        <p>Hotest Poll Here</p>
+                        <!-- TODO(sandro): actually render some friggen polls here... -->
+                        {% for poll in hottest_poll_list %}
+                            <p>{{ poll.question }}</p>
+                        {% endfor %}
                     </div> <!-- closes tab-pane -->
                 </div> <!-- close tab content -->
             </div> <!-- /tabbable -->

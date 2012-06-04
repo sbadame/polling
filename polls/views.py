@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext, Context, loader
 from django.core.urlresolvers import reverse
-from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote,RandomPollPick,NewestPollPick,MostVotedPollPick
+from polls.models import Poll,Public_Poll,Private_Poll,Choice,Vote,RandomPollPick,NewestPollPick,MostVotedPollPick,PopularPollPick
 from django.views.decorators.cache import cache_page
 import datetime
 import haystack
@@ -77,13 +77,15 @@ def index(request):
     latest_poll_list = [x.poll for x in NewestPollPick.objects.all()]
     mostvoted_poll_list = [x.poll for x in MostVotedPollPick.objects.all()]
     danger_poll_list = Public_Poll.objects.filter(date_expire__gt=now).order_by('date_expire')[:10]
+    hottest_poll_list = [x.poll for x in PopularPollPick.objects.all()]
     random_poll = get_random_poll()
     template = "index.html"
     return render_to_response(template,
             {'latest_poll_list': latest_poll_list,
              'mostvoted_poll_list': mostvoted_poll_list,
              'random_poll': random_poll,
-             'danger_poll_list': danger_poll_list
+             'danger_poll_list': danger_poll_list,
+             'hottest_poll_list': hottest_poll_list
             },
             context_instance=RequestContext(request))
 
