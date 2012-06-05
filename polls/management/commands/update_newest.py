@@ -15,6 +15,8 @@ class Command(BaseCommand):
         for pick in NewestPollPick.objects.all(): pick.delete()
 
         picks = Public_Poll.objects.exclude(date_expire__lt=datetime.now()).order_by('-date_created')[:NUMBER_OF_POLLS]
+        if not picks:
+            print("Warning: No polls found for newest polls")
 
         for index, poll in enumerate(picks):
             NewestPollPick.objects.create(index=index, poll=poll).save()

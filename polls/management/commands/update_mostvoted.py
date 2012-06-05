@@ -14,6 +14,10 @@ class Command(BaseCommand):
 
         picks = Public_Poll.objects.exclude(date_expire__lt=datetime.now()).order_by('-total_votes')[:NUMBER_OF_POLLS]
 
+        if not picks:
+            print("Warning: Couldn't find any non-expired polls for most voted polls")
+            return
+
         for index, poll in enumerate(picks):
             MostVotedPollPick.objects.create(index=index, poll=poll).save()
 
