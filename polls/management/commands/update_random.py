@@ -10,9 +10,14 @@ class Command(BaseCommand):
     help = 'Updates the list of random polls'
 
     def handle(self, *args, **options):
+        print("Hello")
         picks = Public_Poll.objects.exclude(date_expire__lt=datetime.now()).order_by('?')[:NUMBER_OF_POLLS]
-        for index, pick in enumerate(picks):
 
+        if not picks:
+            print("Warning: No polls found for random polls")
+            return
+
+        for index, pick in enumerate(picks):
             #Get rid of the old index for this poll if it exists
             try:
                 oldentry = RandomPollPick.objects.get(poll=pick)

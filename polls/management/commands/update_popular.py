@@ -22,6 +22,10 @@ class Command(BaseCommand):
         for pick in PopularPollPick.objects.all(): pick.delete()
 
         picks = list(Public_Poll.objects.exclude(date_expire__lt=datetime.now()).all())
+        if not picks:
+            print("Warning: Couldn't find any non-expired polls for popular polls")
+            return
+
         picks.sort(key=popular_score, reverse=True) #We want descending order
         picks = picks[:NUMBER_OF_POLLS]
 
