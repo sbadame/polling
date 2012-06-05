@@ -4,47 +4,72 @@ import settings
 
 register = template.Library()
 
-@register.tag('poll_script')
+poll_html = '''
+    <div id="poll_container%(id)d">
+        <noscript>
+            <img src="%(image_URL)s" />
+            <form class="well form-inline" action="%(vote_URL)s" method="post">
+                <div style='display:none;'><input type='hidden' id='csrfmiddlewaretoken' name='csrfmiddlewaretoken' value='%(csrf)s'/></div>
+                Vote For:
+                %(choices)s
+            </form>
+        </noscript>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var data = [%(data)s];
+                var choiceIds = [%(choiceIds)s];
+                graph($('#poll_container%(id)d').get(0), data, "%(vote_URL)s", choiceIds, '%(csrf)s', {});
+            });
+        </script>
+        <style type="text/css">
+            #poll_container%(id)d {
+                width: 500px;
+                height: 300px;
+            }
+        </style>
+    </div>'''
+
+@register.tag('poll')
 def do_render_poll(parser, tokens):
     try:
-        tag_name, poll, domElem = tokens.split_contents()
+        tag_name, poll = tokens.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly two arguments" % tokens.contents.split()[0])
-    return PollNode(poll, domElem)
-
-
-html="""    <style type="text/css">
-        %(domElem)s {
-            width: 500px;
-            height: 300px;
-        }
-    </style>
-    <script type="text/javascript" src="%(static)sgraphing/raphael-min.js"></script>
-    <script type="text/javascript" src="%(static)sgraphing/fancygraphs.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            var data = [%(data)s];
-            var choiceIds = [%(choiceIds)s];
-            graph($('%(domElem)s').get(0), data, "%(voteURL)s", choiceIds, '%(csrf)s', {});
-        });
-    </script>"""
+        raise template.TemplateSyntaxError("%r tag requires exactly 1 arguement" % tokens.contents.split()[0])
+    return PollNode(poll)
 
 class PollNode(template.Node):
 
-    def __init__(self, poll, domElem):
+    def __init__(self, poll):
         self.poll = template.Variable(poll)
-        self.domElem = domElem
 
     def render(self, context):
         try:
             poll = self.poll.resolve(context)
         except template.VariableDoesNotExist:
-            return ''
+            return '%s does not exist' % str(self.poll)
+
+        #Every poll get an id so that we can apply js/css to it.
+        #This is where we can actually store our custom variables...
+        #From: http://stackoverflow.com/questions/2566265/is-there-a-django-template-tag-that-lets-me-set-a-context-variable
+        POLLCOUNTKEY = "pollcount"
+        c = context.dicts[0] 
+        pollcount = c[POLLCOUNTKEY] if POLLCOUNTKEY in c else 0
+        c[POLLCOUNTKEY] = pollcount + 1
+
+        choices = "\n".join([
+            '<input type="submit" value="' + choice.choice + '" name="choice" />'
+            for choice in poll.choice_set.all()])
+
         data = ','.join([ "['%s',%d]" % (escapejs(str(choice)), votes) for (choice, votes) in poll.results()])
         choiceIds = ','.join([ str(c.id) for c in poll.choice_set.all() ])
-        voteURL = poll.get_vote_url()
-        csrf = context.get('csrf_token', None)
 
-        static = settings.STATIC_URL
-        return html % {"static":static, "data":data, "choiceIds":choiceIds, "voteURL":voteURL, "csrf":csrf, "domElem":self.domElem}
+        return poll_html % {
+            "image_URL": poll.get_image_url(),
+            "vote_URL": poll.get_vote_url(),
+            "choices":choices,
+            "csrf": context.get('csrf_token', None),
+            "id":pollcount,
+            "data":data,
+            "choiceIds": choiceIds
+        }
 

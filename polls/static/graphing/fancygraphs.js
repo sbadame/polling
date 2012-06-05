@@ -226,10 +226,8 @@ function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
         x += barWidth + s.barPadding;
     }
 
-
-
     //Moments like this I just love jquery... get all of the hyperlinks (generated because by the title elements in
     //raphael) and apply some css to them. I could do this in a style sheet... but not until we have a main *.css file
     //with all of our crap. Not going to add in a new sheet just for 2 properties.
-    $("#canvas_container a").css("text-decoration","none").css("cursor","default");
+    $(element).css("text-decoration","none").css("cursor","default");
 }

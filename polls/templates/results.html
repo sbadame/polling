@@ -13,20 +13,7 @@
             {% endif %}
 
             <h1>{{ poll.question }}</h1>
-
-            <div id="graph"></div>
-            <div id="canvas_container">
-                <noscript>
-                    <img src="{{ poll.get_image_url }}"/>
-                    <form class="well form-inline" action="{{ poll.get_vote_url }}" method="post">
-                    {% csrf_token %}
-                        Vote For:
-                        {% for choice in poll.choice_set.all %}
-                            <input type="submit" value="{{ choice.choice }}" name="choice" />
-                        {% endfor %}
-                    </form>
-                </noscript>
-            </div>
+            {% poll poll %}
         </div>
         <div class="span4">
             <h2>Poll Fun Facts</h2>
@@ -45,5 +32,4 @@
 {% endblock %}
 
 {% block scripts %}
-    {% poll_script poll #canvas_container %}
 {% endblock %}
