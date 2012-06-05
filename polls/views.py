@@ -74,18 +74,16 @@ def get_random_poll():
 #@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
     now = datetime.datetime.now()
-    latest_poll_list = [x.poll for x in NewestPollPick.objects.all()]
-    mostvoted_poll_list = [x.poll for x in MostVotedPollPick.objects.all()]
-    danger_poll_list = Public_Poll.objects.filter(date_expire__gt=now).order_by('date_expire')[:10]
-    hottest_poll_list = [x.poll for x in PopularPollPick.objects.all()]
+    latest_poll = [x.poll for x in NewestPollPick.objects.all()][0]
+    mostvoted_poll = [x.poll for x in MostVotedPollPick.objects.all()][0]
+    hottest_poll = [x.poll for x in PopularPollPick.objects.all()][0]
     random_poll = get_random_poll()
     template = "index.html"
     return render_to_response(template,
-            {'latest_poll_list': latest_poll_list,
-             'mostvoted_poll_list': mostvoted_poll_list,
+            {'latest_poll': latest_poll,
+             'mostvoted_poll': mostvoted_poll,
              'random_poll': random_poll,
-             'danger_poll_list': danger_poll_list,
-             'hottest_poll_list': hottest_poll_list
+             'hottest_poll': hottest_poll
             },
             context_instance=RequestContext(request))
 

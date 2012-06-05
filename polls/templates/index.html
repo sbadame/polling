@@ -18,23 +18,23 @@
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Most Voted </h4>
-                            <h5> Our polls with the most votes! </h5>
+                            <h5> {{ mostvoted_poll.question }} </h5>
                         </div>
-                        {% with mostvoted_poll_list.0 as most_voted %}{% poll most_voted%} {% endwith %}
+                        {% poll mostvoted_poll %}
                     </div>
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Latest </h4>
-                            <h5> Our latest polls! </h5>
+                            <h5> {{ latest_poll.question }} </h5>
                         </div>
-                        {% with latest_poll_list.0 as latest %}{% poll latest%} {% endwith %}
+                        {% poll latest_poll %}
                     </div> <!-- closes tab-pane -->
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Hottest </h4>
-                            <h5> Our hottest polls! </h5>
+                            <h5> {{ hottest_poll.question }} </h5>
                         </div>
-                        {% with hottest_poll_list.0 as hottest %}{% poll hottest%} {% endwith %}
+                        {% poll hottest_poll %}
                     </div> <!-- closes tab-pane -->
                 </div>
                 <!-- Carousel nav -->
