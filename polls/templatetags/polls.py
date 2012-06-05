@@ -48,8 +48,11 @@ class PollNode(template.Node):
         except template.VariableDoesNotExist:
             return '%s does not exist' % str(self.poll)
 
+        #Every poll get an id so that we can apply js/css to it.
+        #This is where we can actually store our custom variables...
+        #From: http://stackoverflow.com/questions/2566265/is-there-a-django-template-tag-that-lets-me-set-a-context-variable
         POLLCOUNTKEY = "pollcount"
-        c = context.dicts[0]
+        c = context.dicts[0] 
         pollcount = c[POLLCOUNTKEY] if POLLCOUNTKEY in c else 0
         c[POLLCOUNTKEY] = pollcount + 1
 
