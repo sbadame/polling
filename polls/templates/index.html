@@ -14,52 +14,32 @@
                             <h5>{{ random_poll.question }}</h5>
                         </div>
                         {% poll random_poll %}
-                        <div id="canvas_container">
-                            <noscript>
-                            <img src="{{ random_poll.get_image_url }}" style="margin: 0 auto;"/>
-                            <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
-                            {% csrf_token %}
-                                Vote For:
-                                {% for choice in random_poll.choice_set.all %}
-                                        <input type="submit" value="{{ choice.choice }}" name="choice" />
-                                {% endfor %}
-                            </form>
-                            </noscript> 
-                        </div>  <!-- close canvas container --> 
                     </div> <!-- close carousel item -->
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Most Voted </h4>
                             <h5> Our polls with the most votes! </h5>
                         </div>
-                        {% for poll in mostvoted_poll_list %}
-                            <p>{{ poll.question }}</p>
-                        {% endfor %}
+                        {% with mostvoted_poll_list.0 as most_voted %}{% poll most_voted%} {% endwith %}
                     </div>
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Latest </h4>
                             <h5> Our latest polls! </h5>
                         </div>
-                        <!-- TODO(sandro): actually render some friggen polls here... -->
-                        {% for poll in latest_poll_list %}
-                            <p>{{ poll.question }}</p>
-                        {% endfor %}
+                        {% with latest_poll_list.0 as latest %}{% poll latest%} {% endwith %}
                     </div> <!-- closes tab-pane -->
                     <div class="item">
                         <div class="carousel-caption">
                             <h4> Hottest </h4>
                             <h5> Our hottest polls! </h5>
                         </div>
-                        <!-- TODO(sandro): actually render some friggen polls here... -->
-                        {% for poll in hottest_poll_list %}
-                            <p>{{ poll.question }}</p>
-                        {% endfor %}
+                        {% with hottest_poll_list.0 as hottest %}{% poll hottest%} {% endwith %}
                     </div> <!-- closes tab-pane -->
-                    <!-- Carousel nav -->
-                    <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-                    <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
                 </div>
+                <!-- Carousel nav -->
+                <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+                <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
             </div>
         </div>
         <div class="span4">
@@ -168,5 +148,4 @@
 
         });
     </script>
-    {% poll_script random_poll #canvas_container %}
 {% endblock %}

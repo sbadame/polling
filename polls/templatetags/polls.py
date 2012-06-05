@@ -5,17 +5,28 @@ import settings
 register = template.Library()
 
 poll_html = '''
-    <div class="poll_container" id="canvas_container">
+    <div id="poll_container%(id)d">
         <noscript>
-        <img src="{{ random_poll.get_image_url }}" style="margin: 0 auto;"/>
-        <form class="well form-inline" action="{{ random_poll.get_vote_url }}" method="post">
-        {% csrf_token %}
-            Vote For:
-            {% for choice in random_poll.choice_set.all %}
-                    <input type="submit" value="{{ choice.choice }}" name="choice" />
-            {% endfor %}
-        </form>
-        </noscript> 
+            <img src="%(image_URL)s" />
+            <form class="well form-inline" action="%(vote_URL)s" method="post">
+                <div style='display:none;'><input type='hidden' id='csrfmiddlewaretoken' name='csrfmiddlewaretoken' value='%(csrf)s'/></div>
+                Vote For:
+                %(choices)s
+            </form>
+        </noscript>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var data = [%(data)s];
+                var choiceIds = [%(choiceIds)s];
+                graph($('#poll_container%(id)d').get(0), data, "%(vote_URL)s", choiceIds, '%(csrf)s', {});
+            });
+        </script>
+        <style type="text/css">
+            #poll_container%(id)d {
+                width: 500px;
+                height: 300px;
+            }
+        </style>
     </div>'''
 
 @register.tag('poll')
@@ -35,51 +46,27 @@ class PollNode(template.Node):
         try:
             poll = self.poll.resolve(context)
         except template.VariableDoesNotExist:
-            return ''
-        return '<h1>Sandro: %s<h1>' % poll.question
+            return '%s does not exist' % str(self.poll)
 
+        POLLCOUNTKEY = "pollcount"
+        c = context.dicts[0]
+        pollcount = c[POLLCOUNTKEY] if POLLCOUNTKEY in c else 0
+        c[POLLCOUNTKEY] = pollcount + 1
 
-@register.tag('poll_script')
-def do_render_poll_script(parser, tokens):
-    try:
-        tag_name, poll, domElem = tokens.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly two arguments" % tokens.contents.split()[0])
-    return PollScriptNode(poll, domElem)
+        choices = "\n".join([
+            '<input type="submit" value="' + choice.choice + '" name="choice" />'
+            for choice in poll.choice_set.all()])
 
-
-script_html="""    <style type="text/css">
-        %(domElem)s {
-            width: 500px;
-            height: 300px;
-        }
-    </style>
-    <script type="text/javascript" src="%(static)sgraphing/raphael-min.js"></script>
-    <script type="text/javascript" src="%(static)sgraphing/fancygraphs.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            var data = [%(data)s];
-            var choiceIds = [%(choiceIds)s];
-            graph($('%(domElem)s').get(0), data, "%(voteURL)s", choiceIds, '%(csrf)s', {});
-        });
-    </script>"""
-
-class PollScriptNode(template.Node):
-
-    def __init__(self, poll, domElem):
-        self.poll = template.Variable(poll)
-        self.domElem = domElem
-
-    def render(self, context):
-        try:
-            poll = self.poll.resolve(context)
-        except template.VariableDoesNotExist:
-            return ''
         data = ','.join([ "['%s',%d]" % (escapejs(str(choice)), votes) for (choice, votes) in poll.results()])
         choiceIds = ','.join([ str(c.id) for c in poll.choice_set.all() ])
-        voteURL = poll.get_vote_url()
-        csrf = context.get('csrf_token', None)
 
-        static = settings.STATIC_URL
-        return script_html % {"static":static, "data":data, "choiceIds":choiceIds, "voteURL":voteURL, "csrf":csrf, "domElem":self.domElem}
+        return poll_html % {
+            "image_URL": poll.get_image_url(),
+            "vote_URL": poll.get_vote_url(),
+            "choices":choices,
+            "csrf": context.get('csrf_token', None),
+            "id":pollcount,
+            "data":data,
+            "choiceIds": choiceIds
+        }
 
