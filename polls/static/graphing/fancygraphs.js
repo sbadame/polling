@@ -44,7 +44,8 @@ String.prototype.format = function() {
  *      ex) an example value could be: [['Sandro', 100], ['Chris', 200]]
  * overrides: A list of settings that you can override
  */
-function graph(element, data, voteurl, choiceIds, csrftoken, overrides) {
+function graph(jqueryEvent, element, data, voteurl, choiceIds, csrftoken, overrides) {
+    //TODO(sandro): jquery event is currently unused, but jquery passes it us. There should probably be a delegate method used here
     var voted = false;
     if (overrides == undefined) {
         overrides = [];

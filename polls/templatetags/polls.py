@@ -14,11 +14,11 @@ poll_html = '''
             </form>
         </noscript>
         <script type="text/javascript">
-            $(document).ready(function(){
-                var data = [%(data)s];
-                var choiceIds = [%(choiceIds)s];
-                graph($('#poll_container%(id)d').get(0), data, "%(vote_URL)s", choiceIds, '%(csrf)s', {});
-            });
+            data[%(id)d] = [%(data)s];
+            choiceIds[%(id)d] = [%(choiceIds)s];
+            vote_URLs[%(id)d] =  "%(vote_URL)s";
+            csrf = "%(csrf)s";
+            $('#poll_container%(id)d').bind('isVisible', graph);
         </script>
     </div>'''
 

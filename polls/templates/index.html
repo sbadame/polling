@@ -8,6 +8,12 @@
             <div id="myCarousel" class="carousel slide">
                 <!-- Carousel items -->
                 <div class="carousel-inner">
+                    <script type="text/javascript">
+                        var data = [];
+                        var choiceIds = [];
+                        var vote_URLs = [];
+                        var csrf = "";
+                    </script>
                     <div class="active item">
                         <div class="carousel-caption">
                             <h4>Random Poll</h4>
@@ -37,6 +43,36 @@
                         {% poll hottest_poll %}
                     </div> <!-- closes tab-pane -->
                 </div>
+                <script type="text/javascript">
+                    var carouselIndex = 0;
+                    var itemCount = $("#myCarousel .item").size();
+
+                    function argsFor(x, i) {
+                        //This should really be a an array of dicts, not an array of arrays... but w/e
+                        return  [x, data[i], vote_URLs[i], choiceIds[i], csrf, {}]
+                    }
+
+                    $("#myCarousel").bind("slide", function(){
+                        //eq is like get but it returns jquery object, not the dom element
+                        //carouselItems.eq(carouselIndex).hide();
+                        carouselIndex++;
+                        if (carouselIndex >= itemCount) {
+                            carouselIndex = 0;
+                        }
+
+                        //carouselItems.eq(carouselIndex).slideDown();
+                        activePoll = $("#poll_container" + carouselIndex);
+                        args = argsFor(activePoll.get(0), carouselIndex);
+                        activePoll.trigger('isVisible', args);
+                    });
+
+                    $(document).ready(function(){
+                        var poll = $("#poll_container0");
+                        args = argsFor(poll.get(0), 0);
+                        poll.trigger('isVisible', args);
+                    });
+
+                </script>
                 <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
                 <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
             </div>
