@@ -6,6 +6,9 @@ import random
 QUESTION_POOL_FILE = "polls/management/commands/questions.txt"
 CHOICES_POOL_FILE = "polls/management/commands/choices.txt"
 
+def create_random_polls(howmany):
+    Command().handle(howmany)
+
 class Command(BaseCommand):
     args = '<number of polls>'
     help = 'Generates a number of random giberish Pubic Polls'
