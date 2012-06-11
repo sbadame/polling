@@ -51,11 +51,12 @@ class Poll(models.Model):
         return ('polls.image.view_public', (), {'poll_id':self.id})
 
     def __unicode__(self):
-        return "%s(id=%d,question=\"%s\",expires=%s)" % (
+        return "%s(id=%d,question=\"%s\",expires=%s,choices=%s)" % (
             self.__class__.__name__,
             self.id,
             self.question,
-            self.date_expire)
+            self.date_expire,
+            "[" + ", ".join(c.choice for c in self.choice_set.all()) + "]")
 
 
 class Public_Poll(Poll):

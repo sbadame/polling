@@ -5,28 +5,21 @@ import settings
 register = template.Library()
 
 poll_html = '''
-    <div id="poll_container%(id)d">
+    <div id="poll_container%(id)d" style="width: 500px; height: 300px;">
         <noscript>
-            <img src="%(image_URL)s" />
+            <img src="%(image_URL)s" alt="poll rendered here" />
             <form class="well form-inline" action="%(vote_URL)s" method="post">
-                <div style='display:none;'><input type='hidden' id='csrfmiddlewaretoken' name='csrfmiddlewaretoken' value='%(csrf)s'/></div>
                 Vote For:
                 %(choices)s
             </form>
         </noscript>
         <script type="text/javascript">
-            $(document).ready(function(){
-                var data = [%(data)s];
-                var choiceIds = [%(choiceIds)s];
-                graph($('#poll_container%(id)d').get(0), data, "%(vote_URL)s", choiceIds, '%(csrf)s', {});
-            });
+            data[%(id)d] = [%(data)s];
+            choiceIds[%(id)d] = [%(choiceIds)s];
+            vote_URLs[%(id)d] =  "%(vote_URL)s";
+            csrf = "%(csrf)s";
+            $('#poll_container%(id)d').bind('isVisible', graph);
         </script>
-        <style type="text/css">
-            #poll_container%(id)d {
-                width: 500px;
-                height: 300px;
-            }
-        </style>
     </div>'''
 
 @register.tag('poll')

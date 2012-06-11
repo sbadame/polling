@@ -16,7 +16,13 @@ class Command(BaseCommand):
 
         picks = Public_Poll.objects.exclude(date_expire__lt=datetime.now()).order_by('-date_created')[:NUMBER_OF_POLLS]
         if not picks:
-            print("Warning: No polls found for newest polls")
+            print("Warning: No polls found for newest polls. Going to attempt to generate some polls and try again")
+            from polls.management.commands.generate_random import create_random_polls
+            create_random_polls(NUMBER_OF_POLLS * 2)
+        picks = Public_Poll.objects.exclude(date_expire__lt=datetime.now()).order_by('-date_created')[:NUMBER_OF_POLLS]
+        if not picks:
+            print("ERROR!!! Couldn't find any latest polls and wasn't able to generate them!")
+
 
         for index, poll in enumerate(picks):
             NewestPollPick.objects.create(index=index, poll=poll).save()
