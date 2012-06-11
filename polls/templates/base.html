@@ -10,64 +10,18 @@
         <script type="text/javascript" src="{{STATIC_URL}}bootstrap/js/bootstrap-carousel.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}graphing/raphael-min.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}graphing/fancygraphs.js"></script>
-        {% compressed_css 'custombootstrap' %}
         <script type="text/javascript">
-            eventHandlers = {
-                'focus': function(){
-                    //Find the first number in the choice,
-                    var index = this.id.match(/\d+/);
-                    if ($(this).val() == "Choice " + index) {
-                        $(this).val('');
-                    }
-                },
+            var data = [];
+            var choiceIds = [];
+            var vote_URLs = [];
+            var csrf = "";
 
-                'blur': function(){
-                    //Find the first number in the choice,
-                    var index = this.id.match(/\d+/);
-                    if ($(this).val() == "") {
-                        $(this).val('Choice ' + index);
-                    }
-                }
-            };
-
-            optionCount = 3;
-            function addPollOption() {
-                options = document.getElementById("options");
-
-                // Input
-                input = document.createElement("input");
-                options.appendChild(input);
-                options.appendChild(document.createElement("br"));
-
-                input.type = "text";
-                input.name = "choice" + optionCount;
-                input.id = "choice" + optionCount + "input";
-                $(input).val("Choice " + optionCount);
-
-                optionCount++;
-                $(input).bind(eventHandlers);
+            function argsFor(x, i) {
+                //This should really be a an array of dicts, not an array of arrays... but w/e
+                return  [x, data[i], vote_URLs[i], choiceIds[i], csrf, {}]
             }
-
-            $(document).ready(function(){
-                inputs = $("#options input:text");
-                inputs.bind(eventHandlers);
-                inputs.val(function (index) {
-                    return "Choice " + (index + 1);
-                });
-
-                var addChoiceButton = document.createElement('input');
-                addChoiceButton.type = "button";
-                $(addChoiceButton).addClass("btn-small btn");
-                addChoiceButton.onclick = addPollOption;
-                addChoiceButton.value = "Add Another Choice";
-
-                var container = document.getElementById("addOptionContainer");
-                container.appendChild(addChoiceButton);
-
-                $("#questioninput").val("Enter Your Question Here");
-
-            });
         </script>
+        {% compressed_css 'custombootstrap' %}
         <title>{% block title %}gimme a poll{% endblock %}</title>
     </head>
     <body>

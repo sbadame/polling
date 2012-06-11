@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
 {% load polls %}
 
@@ -27,9 +28,13 @@
         </div>
     </div>
 </div>
-
-
 {% endblock %}
 
 {% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        poll = $("#poll_container0");
+        poll.trigger('isVisible', argsFor(poll.get(0), 0));
+    });
+</script>
 {% endblock %}
