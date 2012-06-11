@@ -8,12 +8,6 @@
             <div id="myCarousel" class="carousel slide">
                 <!-- Carousel items -->
                 <div class="carousel-inner">
-                    <script type="text/javascript">
-                        var data = [];
-                        var choiceIds = [];
-                        var vote_URLs = [];
-                        var csrf = "";
-                    </script>
                     <div class="active item">
                         <div class="carousel-caption">
                             <h4>Random Poll</h4>
@@ -46,11 +40,6 @@
                 <script type="text/javascript">
                     var carouselIndex = 0;
                     var itemCount = $("#myCarousel .item").size();
-
-                    function argsFor(x, i) {
-                        //This should really be a an array of dicts, not an array of arrays... but w/e
-                        return  [x, data[i], vote_URLs[i], choiceIds[i], csrf, {}]
-                    }
 
                     $("#myCarousel").bind("slide", function(){
                         //eq is like get but it returns jquery object, not the dom element
@@ -126,4 +115,61 @@
 {% endblock %}
 
 {% block scripts %}
+<script type="text/javascript">
+    eventHandlers = {
+        'focus': function(){
+            //Find the first number in the choice,
+            var index = this.id.match(/\d+/);
+            if ($(this).val() == "Choice " + index) {
+                $(this).val('');
+            }
+        },
+
+        'blur': function(){
+            //Find the first number in the choice,
+            var index = this.id.match(/\d+/);
+            if ($(this).val() == "") {
+                $(this).val('Choice ' + index);
+            }
+        }
+    };
+
+    optionCount = 3;
+    function addPollOption() {
+        options = document.getElementById("options");
+
+        // Input
+        input = document.createElement("input");
+        options.appendChild(input);
+        options.appendChild(document.createElement("br"));
+
+        input.type = "text";
+        input.name = "choice" + optionCount;
+        input.id = "choice" + optionCount + "input";
+        $(input).val("Choice " + optionCount);
+
+        optionCount++;
+        $(input).bind(eventHandlers);
+    }
+
+    $(document).ready(function(){
+        inputs = $("#options input:text");
+        inputs.bind(eventHandlers);
+        inputs.val(function (index) {
+            return "Choice " + (index + 1);
+        });
+
+        var addChoiceButton = document.createElement('input');
+        addChoiceButton.type = "button";
+        $(addChoiceButton).addClass("btn-small btn");
+        addChoiceButton.onclick = addPollOption;
+        addChoiceButton.value = "Add Another Choice";
+
+        var container = document.getElementById("addOptionContainer");
+        container.appendChild(addChoiceButton);
+
+        $("#questioninput").val("Enter Your Question Here");
+
+    });
+</script>
 {% endblock %}
