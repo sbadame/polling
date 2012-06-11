@@ -10,6 +10,13 @@ import haystack
 import hashlib
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
+def combine_dicts(*dicts):
+    """ Combine a bunch of dictionaries into a single dict """
+    r = {}
+    for d in dicts:
+        r.update(d)
+    return r
+
 def request_hash(request):
     hasher = hashlib.md5()
     hasher.update(request.META['REMOTE_ADDR'])
@@ -20,12 +27,32 @@ def already_voted(request, poll):
     hash = request_hash(request)
     return poll.vote_set.filter(hash__exact=hash).exists()
 
+def get_random_poll():
+    from settings import NUMBER_OF_RANDOM_POLLS
+    import random
+    index = random.randint(0, NUMBER_OF_RANDOM_POLLS - 1)
+    return RandomPollPick.objects.get(index=index).poll
+
+def front_page_polls():
+    now = datetime.datetime.now()
+    latest_poll = [x.poll for x in NewestPollPick.objects.all()][0]
+    mostvoted_poll = [x.poll for x in MostVotedPollPick.objects.all()][0]
+    hottest_poll = [x.poll for x in PopularPollPick.objects.all()][0]
+    random_poll = get_random_poll()
+    return {'latest_poll': latest_poll,
+             'mostvoted_poll': mostvoted_poll,
+             'random_poll': random_poll,
+             'hottest_poll': hottest_poll
+            }
+
 def create(request):
     #Test whether we actually got a question
     if 'question' not in request.POST or not request.POST['question'].strip():
         return render_to_response(\
-            'index.html',\
-            {'error_message':"You did not supply a question"},\
+            'index.html',
+            combine_dicts(
+                front_page_polls(),
+                {'error_message':"You did not supply a question"}),
             context_instance = RequestContext(request))
 
     question = request.POST['question'].strip()
@@ -45,9 +72,11 @@ def create(request):
         index += 1
 
     if not choices or len(choices) < 2:
-        return render_to_response(\
-            'index.html',\
-            {'error_message':"You did not supply enough choices"},\
+        return render_to_response(
+            'index.html',
+            combine_dicts(
+                front_page_polls(),
+                {'error_message':"You did not supply enough choices"}),
             context_instance = RequestContext(request))
     else:
         if request.POST['pub_priv'] == 'Private':
@@ -65,26 +94,12 @@ def view_private(request, private_hash):
     poll = get_object_or_404(Private_Poll, private_hash=private_hash)
     return render_to_response("results.html", {'poll' : poll}, context_instance=RequestContext(request))
 
-def get_random_poll():
-    from settings import NUMBER_OF_RANDOM_POLLS
-    import random
-    index = random.randint(0, NUMBER_OF_RANDOM_POLLS - 1)
-    return RandomPollPick.objects.get(index=index).poll
 
 #@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
-    now = datetime.datetime.now()
-    latest_poll = [x.poll for x in NewestPollPick.objects.all()][0]
-    mostvoted_poll = [x.poll for x in MostVotedPollPick.objects.all()][0]
-    hottest_poll = [x.poll for x in PopularPollPick.objects.all()][0]
-    random_poll = get_random_poll()
     template = "index.html"
     return render_to_response(template,
-            {'latest_poll': latest_poll,
-             'mostvoted_poll': mostvoted_poll,
-             'random_poll': random_poll,
-             'hottest_poll': hottest_poll
-            },
+            front_page_polls(),
             context_instance=RequestContext(request))
 
 def vote_public(request, poll_id):

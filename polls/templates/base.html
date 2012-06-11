@@ -46,6 +46,11 @@
                 should work.
             </div>
         </noscript>
+        {%if error_message %}
+            <div class="alert alert-error">
+                {{ error_message }}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
 
