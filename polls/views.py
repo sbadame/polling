@@ -98,8 +98,9 @@ def view_private(request, private_hash):
 #@cache_page(60 * 15) #Only update the index page every 15 minutes... nice...
 def index(request):
     template = "index.html"
+    p = request.GET['p'] if 'p' in request.GET else "INITIAL"
     return render_to_response(template,
-            front_page_polls(),
+            combine_dicts(front_page_polls(), {"p": p}),
             context_instance=RequestContext(request))
 
 def vote_public(request, poll_id):

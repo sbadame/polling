@@ -10,10 +10,37 @@
                 <div class="carousel-inner">
                     <div class="active item">
                         <div class="carousel-caption">
-                            <h4>Random Poll</h4>
-                            <h5>{{ random_poll.question }}</h5>
+                            {% if p == "hottest" %}
+                                <h4>Hottest Poll</h4>
+                                <h5>{{ hottest_poll.question }}</h5>
+                            {% else %}
+                                {% if p == "voted" %}
+                                    <h4>Most Voted Poll</h4>
+                                    <h5>{{ mostvoted_poll.question }}</h5>
+                                {% else %}
+                                    {% if p == "latest" %}
+                                        <h4>Latest Poll</h4>
+                                        <h5>{{ latest_poll.question }}</h5>
+                                    {% else %}
+                                        <h4>Random Poll</h4>
+                                        <h5>{{ random_poll.question }}</h5>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
                         </div>
-                        {% poll random_poll %}
+                            {% if p == "hottest" %}
+                                {% poll hottest_poll %}
+                            {% else %}
+                                {% if p == "voted" %}
+                                    {% poll mostvoted_poll %}
+                                {% else %}
+                                    {% if p == "latest" %}
+                                        {% poll latest_poll %}
+                                    {% else %}
+                                        {% poll random_poll %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
                     </div> <!-- close carousel item -->
                     <div class="item">
                         <div class="carousel-caption">
@@ -64,6 +91,30 @@
                 </script>
                 <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
                 <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+                <noscript>
+                    {% if p == "random" %}
+                        <a class="carousel-control left" href="{% url index_view %}?p=hottest" data-slide="prev">&lsaquo;</a>
+                        <a class="carousel-control right" href="{% url index_view %}?p=voted" data-slide="next">&rsaquo;</a>
+                    {% else %}
+                        {% if p == "voted" %}
+                            <a class="carousel-control left" href="{% url index_view %}?p=random" data-slide="prev">&lsaquo;</a>
+                            <a class="carousel-control right" href="{% url index_view %}?p=latest" data-slide="next">&rsaquo;</a>
+                        {% else %}
+                            {% if p == "latest" %}
+                                <a class="carousel-control left" href="{% url index_view %}?p=voted" data-slide="prev">&lsaquo;</a>
+                                <a class="carousel-control right" href="{% url index_view %}?p=hottest" data-slide="next">&rsaquo;</a>
+                            {% else %}
+                                {% if p == "hottest" %}
+                                    <a class="carousel-control left" href="{% url index_view %}?p=latest" data-slide="prev">&lsaquo;</a>
+                                    <a class="carousel-control right" href="{% url index_view %}?p=random" data-slide="next">&rsaquo;</a>
+                                {% else %}
+                                    <a class="carousel-control left" href="{% url index_view %}?p=hottest" data-slide="prev">&lsaquo;</a>
+                                    <a class="carousel-control right" href="{% url index_view %}?p=voted" data-slide="next">&rsaquo;</a>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </noscript>
             </div>
         </div>
         <div class="span4">
