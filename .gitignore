@@ -7,3 +7,4 @@ local_settings.py
 *.pyc
 node_modules
 build
+*.pem
