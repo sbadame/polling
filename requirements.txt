@@ -1,6 +1,6 @@
 #For some odd reason numpy needs to be installed manually with: pip install numpy
-MySQL-python==1.2.3
 matplotlib
+MySQL-python==1.2.3
 Django==1.3.1
 South==0.7.3
 django-appconf==0.5
