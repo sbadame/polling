@@ -1,0 +1,1 @@
+tmux mysql-server mysql-client sqlite python-virtualenv memcached libmemcached-dev libmysqlclient-dev git openjdk-6-jre python-pip python-virtualenv gcc python-dev g++ libpng12-dev libfreetype6-dev sqlite3 libsqlite3-dev
